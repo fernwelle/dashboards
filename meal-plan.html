@@ -14,6 +14,7 @@
     --accent: #c8b560;
     --accent2: #7eb89a;
     --accent3: #d4735a;
+    --accent4: #9b8ec4;
     --text: #e8e6df;
     --text-secondary: #8a8878;
     --text-dim: #5a5a50;
@@ -58,9 +59,7 @@
     color: var(--text);
   }
 
-  h1 span {
-    color: var(--accent);
-  }
+  h1 span { color: var(--accent); }
 
   .meta-row {
     display: flex;
@@ -75,34 +74,32 @@
     color: var(--text-secondary);
   }
 
-  .meta-item strong {
-    color: var(--accent);
-    font-weight: 500;
-  }
+  .meta-item strong { color: var(--accent); font-weight: 500; }
 
-  /* Day toggle */
+  /* Toggle */
   .toggle-row {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.4rem;
     margin-bottom: 2rem;
     background: var(--surface);
     padding: 4px;
     border-radius: 8px;
     border: 1px solid var(--border);
-    width: fit-content;
+    flex-wrap: wrap;
   }
 
   .toggle-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.05em;
-    padding: 0.5rem 1rem;
+    padding: 0.45rem 0.85rem;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     background: transparent;
     color: var(--text-secondary);
     transition: all 0.2s;
+    white-space: nowrap;
   }
 
   .toggle-btn.active {
@@ -122,18 +119,13 @@
     transition: border-color 0.2s;
   }
 
-  .meal-card:hover {
-    border-color: var(--text-dim);
-  }
-
-  .meal-card.highlight {
-    border-color: var(--accent);
-    border-left: 3px solid var(--accent);
-  }
-
-  .meal-card.flag {
-    border-color: var(--accent3);
-    border-left: 3px solid var(--accent3);
+  .meal-card:hover { border-color: var(--text-dim); }
+  .meal-card.highlight { border-color: var(--accent); border-left: 3px solid var(--accent); }
+  .meal-card.highlight-purple { border-color: var(--accent4); border-left: 3px solid var(--accent4); }
+  .meal-card.mini {
+    background: var(--surface2);
+    border-style: dashed;
+    padding: 0.9rem 1.25rem;
   }
 
   .meal-header {
@@ -167,6 +159,7 @@
 
   .meal-badge.post { color: var(--accent2); border-color: var(--accent2); }
   .meal-badge.pre { color: var(--accent); border-color: var(--accent); }
+  .meal-badge.fuel { color: var(--accent4); border-color: var(--accent4); }
 
   .meal-name {
     font-family: 'Playfair Display', serif;
@@ -219,7 +212,6 @@
   .f-pill { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
   .cal-pill { background: rgba(212,115,90,0.12); color: var(--accent3); }
 
-  /* Alternatives */
   .alt-section {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
@@ -235,11 +227,7 @@
     margin-bottom: 0.5rem;
   }
 
-  .alt-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
+  .alt-options { display: flex; flex-direction: column; gap: 0.3rem; }
 
   .alt-option {
     font-size: 12px;
@@ -248,7 +236,6 @@
     border-left: 2px solid var(--border);
   }
 
-  /* Flag note */
   .flag-note {
     background: rgba(212,115,90,0.08);
     border: 1px solid rgba(212,115,90,0.25);
@@ -262,7 +249,19 @@
 
   .flag-note strong { font-weight: 500; }
 
-  /* Totals */
+  .info-note {
+    background: rgba(155,142,196,0.08);
+    border: 1px solid rgba(155,142,196,0.25);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 12px;
+    color: var(--accent4);
+    line-height: 1.5;
+  }
+
+  .info-note strong { font-weight: 500; }
+
   .totals-card {
     background: var(--surface2);
     border: 1px solid var(--accent);
@@ -297,7 +296,6 @@
     color: var(--text-dim);
   }
 
-  /* Expert notes */
   .notes-section {
     margin-top: 2rem;
     padding-top: 1.5rem;
@@ -358,6 +356,27 @@
     background: var(--border);
   }
 
+  .timeline-block {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.4rem;
+  }
+
+  .timeline-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent4);
+    min-width: 60px;
+  }
+
+  .timeline-event {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
   @media (max-width: 480px) {
     .totals-card { grid-template-columns: repeat(2, 1fr); }
     .meal-card { padding: 1rem; }
@@ -379,22 +398,23 @@
   </header>
 
   <div class="toggle-row">
-    <button class="toggle-btn active" onclick="showPlan('workout')">Workout Day</button>
-    <button class="toggle-btn" onclick="showPlan('tennis')">Tennis Day</button>
+    <button class="toggle-btn active" onclick="showPlan('workout')">Gym Workout</button>
+    <button class="toggle-btn" onclick="showPlan('home')">Home Workout</button>
+    <button class="toggle-btn" onclick="showPlan('tennis')">Tennis</button>
     <button class="toggle-btn" onclick="showPlan('rest')">Rest Day</button>
   </div>
 
-  <!-- WORKOUT DAY -->
+  <!-- GYM WORKOUT DAY -->
   <div id="plan-workout">
 
-    <div class="section-divider">Morning</div>
+    <div class="section-divider">Morning · Gym at 9AM</div>
 
     <div class="meal-card highlight">
       <div class="meal-header">
         <span class="meal-time">5:30 – 6:00 AM · Meal 1</span>
         <span class="meal-badge pre">Pre-Workout</span>
       </div>
-      <div class="meal-name">4 Scrambled Eggs + Whole Wheat Sourdough + Pumpkin Seeds</div>
+      <div class="meal-name">4 Scrambled Eggs + 1 Slice WW Sourdough + Pumpkin Seeds</div>
       <div class="meal-desc">Protein + slow carbs 3hrs before training. Sourdough fermentation reduces glycemic spike. Pumpkin seeds add zinc + magnesium for testosterone and muscle function.</div>
       <div class="meal-items">
         <span class="item-tag">4 eggs</span>
@@ -418,7 +438,7 @@
         <span class="meal-badge post">Post-Workout</span>
       </div>
       <div class="meal-name">Rajma + Chana Salad with Protein Anchor</div>
-      <div class="meal-desc">Legume base provides complete amino acid profile. Rotate protein anchor for variety. Load vegetables freely — they add volume and micronutrients with minimal calories.</div>
+      <div class="meal-desc">Legume base provides complete amino acid profile. Rotate protein anchor for variety. Load vegetables freely for volume and micronutrients.</div>
       <div class="meal-items">
         <span class="item-tag">100g rajma (cooked)</span>
         <span class="item-tag">100g chana (cooked)</span>
@@ -452,7 +472,7 @@
         <span class="meal-badge">Snack</span>
       </div>
       <div class="meal-name">Chia Jar</div>
-      <div class="meal-desc">Omega-3s, fiber, antioxidants, minerals. Prep the night before — zero morning effort. Protein here is low; that's acceptable given strong Meals 1 and 2.</div>
+      <div class="meal-desc">Omega-3s, fiber, antioxidants, minerals. Prep the night before. Protein is low here — acceptable given strong Meals 1 and 2.</div>
       <div class="meal-items">
         <span class="item-tag">2 tbsp chia seeds</span>
         <span class="item-tag">1 tbsp hemp seeds</span>
@@ -479,7 +499,7 @@
         <span class="meal-badge">Portable</span>
       </div>
       <div class="meal-name">Portable Salad Jar</div>
-      <div class="meal-desc">Batch prep Sunday. Assemble in 3 mins. Light on carbs since you're winding down. Sprouts aid digestion overnight.</div>
+      <div class="meal-desc">Batch prep Sunday. Assemble in 3 mins. Light carbs — winding down for the day. Sprouts aid overnight digestion.</div>
       <div class="meal-items">
         <span class="item-tag">2–3 boiled eggs</span>
         <span class="item-tag">rajma + chana mix</span>
@@ -502,7 +522,7 @@
         <span class="meal-badge">Home Dinner</span>
       </div>
       <div class="meal-name">Grilled Protein + Vegetables</div>
-      <div class="meal-desc">Light on carbs at night. Load vegetables for volume. Rotate protein for variety and micronutrient diversity.</div>
+      <div class="meal-desc">Light carbs at night. Load vegetables for volume. Rotate protein for variety.</div>
       <div class="alt-section">
         <div class="alt-label">Rotate weekly</div>
         <div class="alt-options">
@@ -521,7 +541,7 @@
     </div>
 
     <div class="flag-note">
-      ⚠️ <strong>Protein gap:</strong> This plan delivers ~133–151g protein — 10–45g short of your 160–180g target. To close the gap without dairy: add a pea+rice protein shake (1 scoop ~25g protein) post-workout or alongside Meal 3. This single addition closes the gap completely.
+      ⚠️ <strong>Protein gap:</strong> Plan delivers ~133–151g — short of 160–180g target. Add 1 scoop pea+rice protein shake post-workout or alongside Meal 3 to close the gap completely.
     </div>
 
     <div class="totals-card">
@@ -545,6 +565,194 @@
 
   </div>
 
+  <!-- HOME WORKOUT DAY -->
+  <div id="plan-home" style="display:none">
+
+    <div class="info-note">
+      🕯️ <strong>Home workout day structure:</strong> Wake 4AM → Yagya & puja 4–6AM → Mini fuel 5:45AM → Home workout 6–6:45AM (resistance or walk) → Meal 1 at 7AM post-workout.
+    </div>
+
+    <div class="section-divider">Pre-Dawn · 5:45 AM</div>
+
+    <div class="meal-card mini highlight-purple">
+      <div class="meal-header">
+        <span class="meal-time">5:45 AM · Pre-Workout Fuel</span>
+        <span class="meal-badge fuel">Mini Fuel</span>
+      </div>
+      <div class="meal-name">Dates + Walnuts + Pumpkin Seeds</div>
+      <div class="meal-desc">Prep in a small bowl the night before. Grab and eat in 30 seconds before starting. Just enough to protect muscle during resistance training without heaviness. Skip if doing a walk only.</div>
+      <div class="meal-items">
+        <span class="item-tag">2–3 dates</span>
+        <span class="item-tag">2–3 walnuts</span>
+        <span class="item-tag">10g pumpkin seeds</span>
+      </div>
+      <div class="macro-row">
+        <span class="macro-pill p-pill">~3g protein</span>
+        <span class="macro-pill c-pill">~22g carbs</span>
+        <span class="macro-pill f-pill">~5g fat</span>
+        <span class="macro-pill cal-pill">~145 kcal</span>
+      </div>
+    </div>
+
+    <div class="section-divider">Post-Workout · 7:00 AM · Meal 1</div>
+
+    <div class="meal-card highlight">
+      <div class="meal-header">
+        <span class="meal-time">7:00 AM · Meal 1</span>
+        <span class="meal-badge post">Post-Workout</span>
+      </div>
+      <div class="meal-name">4 Scrambled Eggs + 1 Slice WW Sourdough + Pumpkin Seeds</div>
+      <div class="meal-desc">First proper meal after workout. Protein + carbs immediately post-resistance training is ideal here. Slightly larger meal than normal to support recovery — this is your most important meal on home workout days.</div>
+      <div class="meal-items">
+        <span class="item-tag">4 eggs</span>
+        <span class="item-tag">1 slice WW sourdough</span>
+        <span class="item-tag">30g pumpkin seeds</span>
+        <span class="item-tag">sautéed spinach or tomato</span>
+        <span class="item-tag">minimal butter</span>
+      </div>
+      <div class="macro-row">
+        <span class="macro-pill p-pill">~38g protein</span>
+        <span class="macro-pill c-pill">~22g carbs</span>
+        <span class="macro-pill f-pill">~24g fat</span>
+        <span class="macro-pill cal-pill">~460 kcal</span>
+      </div>
+    </div>
+
+    <div class="section-divider">Lunch · 12:30–1:00 PM</div>
+
+    <div class="meal-card highlight">
+      <div class="meal-header">
+        <span class="meal-time">12:30 – 1:00 PM · Meal 2</span>
+        <span class="meal-badge">Lunch</span>
+      </div>
+      <div class="meal-name">Rajma + Chana Salad with Protein Anchor</div>
+      <div class="meal-desc">Later than gym days since Meal 1 is at 7AM not 6AM. Same salad base, same rotation. Keep carbs moderate — you've already had sourdough at breakfast.</div>
+      <div class="meal-items">
+        <span class="item-tag">100g rajma (cooked)</span>
+        <span class="item-tag">100g chana (cooked)</span>
+        <span class="item-tag">sprouts</span>
+        <span class="item-tag">cucumber + tomato + pepper</span>
+        <span class="item-tag">pumpkin seeds</span>
+        <span class="item-tag">lemon + cumin + chaat masala</span>
+      </div>
+      <div class="alt-section">
+        <div class="alt-label">Protein Anchor — rotate daily</div>
+        <div class="alt-options">
+          <div class="alt-option">🐟 Grilled/baked fish (150g) — best option</div>
+          <div class="alt-option">🍗 Grilled chicken breast (150g)</div>
+          <div class="alt-option">🥚 2–3 boiled eggs</div>
+          <div class="alt-option">🫘 Tofu (150g) + extra dal</div>
+        </div>
+      </div>
+      <div class="macro-row" style="margin-top:0.75rem">
+        <span class="macro-pill p-pill">~50–55g protein</span>
+        <span class="macro-pill c-pill">~45g carbs</span>
+        <span class="macro-pill f-pill">~10g fat</span>
+        <span class="macro-pill cal-pill">~470 kcal</span>
+      </div>
+    </div>
+
+    <div class="section-divider">Afternoon · 4:00–4:30 PM</div>
+
+    <div class="meal-card">
+      <div class="meal-header">
+        <span class="meal-time">4:00 – 4:30 PM · Meal 3</span>
+        <span class="meal-badge">Snack</span>
+      </div>
+      <div class="meal-name">Chia Jar</div>
+      <div class="meal-desc">Shifted slightly later than gym days since meals are pushed back. Same recipe, prepped the night before.</div>
+      <div class="meal-items">
+        <span class="item-tag">2 tbsp chia seeds</span>
+        <span class="item-tag">1 tbsp hemp seeds</span>
+        <span class="item-tag">1 tbsp flaxseeds</span>
+        <span class="item-tag">50g blueberries</span>
+        <span class="item-tag">15g walnuts</span>
+        <span class="item-tag">20g pumpkin seeds</span>
+        <span class="item-tag">½ tsp honey or 2–3 dates</span>
+        <span class="item-tag">cinnamon</span>
+      </div>
+      <div class="macro-row">
+        <span class="macro-pill p-pill">~13g protein</span>
+        <span class="macro-pill c-pill">~28g carbs</span>
+        <span class="macro-pill f-pill">~22g fat</span>
+        <span class="macro-pill cal-pill">~355 kcal</span>
+      </div>
+    </div>
+
+    <div class="section-divider">Dinner</div>
+
+    <div class="meal-card">
+      <div class="meal-header">
+        <span class="meal-time">On the go (4 nights) · Meal 4</span>
+        <span class="meal-badge">Portable</span>
+      </div>
+      <div class="meal-name">Portable Salad Jar</div>
+      <div class="meal-desc">Same as gym days. Batch prepped. No heating needed.</div>
+      <div class="meal-items">
+        <span class="item-tag">2–3 boiled eggs</span>
+        <span class="item-tag">rajma + chana mix</span>
+        <span class="item-tag">sprouts</span>
+        <span class="item-tag">cucumber + tomato + carrot</span>
+        <span class="item-tag">pumpkin seeds</span>
+        <span class="item-tag">lemon + cumin + coriander</span>
+      </div>
+      <div class="macro-row">
+        <span class="macro-pill p-pill">~32g protein</span>
+        <span class="macro-pill c-pill">~30g carbs</span>
+        <span class="macro-pill f-pill">~14g fat</span>
+        <span class="macro-pill cal-pill">~370 kcal</span>
+      </div>
+    </div>
+
+    <div class="meal-card">
+      <div class="meal-header">
+        <span class="meal-time">Home (3 nights) · Meal 4</span>
+        <span class="meal-badge">Home Dinner</span>
+      </div>
+      <div class="meal-name">Grilled Protein + Vegetables</div>
+      <div class="meal-desc">Same rotation as gym days. Keep carbs light at night.</div>
+      <div class="alt-section">
+        <div class="alt-label">Rotate weekly</div>
+        <div class="alt-options">
+          <div class="alt-option">🐟 Grilled fish (150–200g) + roasted vegetables + salad</div>
+          <div class="alt-option">🍗 Grilled chicken (150–200g) + sabzi + 1 roti optional</div>
+          <div class="alt-option">🥚 Dal + egg bhurji (2 eggs) + sabzi + 1 roti</div>
+          <div class="alt-option">🍉 Fruit plate + nuts + pumpkin seeds (max 1x/week)</div>
+        </div>
+      </div>
+      <div class="macro-row" style="margin-top:0.75rem">
+        <span class="macro-pill p-pill">~38–45g protein</span>
+        <span class="macro-pill c-pill">~20–30g carbs</span>
+        <span class="macro-pill f-pill">~12g fat</span>
+        <span class="macro-pill cal-pill">~340–400 kcal</span>
+      </div>
+    </div>
+
+    <div class="flag-note">
+      ⚠️ <strong>Protein gap:</strong> Same as gym days — ~136–154g without supplement. Add pea+rice protein shake post-workout (7AM) alongside Meal 1 for best timing.
+    </div>
+
+    <div class="totals-card">
+      <div class="total-item">
+        <div class="total-label">Protein</div>
+        <div class="total-val">~147<span class="total-unit">g*</span></div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Carbs</div>
+        <div class="total-val">~147<span class="total-unit">g</span></div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Fat</div>
+        <div class="total-val">~73<span class="total-unit">g</span></div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Calories</div>
+        <div class="total-val">~1,800<span class="total-unit">kcal</span></div>
+      </div>
+    </div>
+
+  </div>
+
   <!-- TENNIS DAY -->
   <div id="plan-tennis" style="display:none">
 
@@ -556,7 +764,7 @@
         <span class="meal-badge pre">Pre-Tennis</span>
       </div>
       <div class="meal-name">4 Scrambled Eggs + 1 Slice WW Sourdough + Pumpkin Seeds</div>
-      <div class="meal-desc">Eat immediately at 6AM — only 1hr before play. Keep it light on fat to avoid sluggishness on court. Skip butter or use minimal. Sourdough gives quick accessible carbs.</div>
+      <div class="meal-desc">Eat immediately at 6AM — only 1hr before play. Keep fat minimal to avoid sluggishness on court. Sourdough gives quick accessible carbs for high-intensity rallies.</div>
       <div class="meal-items">
         <span class="item-tag">4 eggs</span>
         <span class="item-tag">1 slice WW sourdough</span>
@@ -577,7 +785,7 @@
         <span class="meal-badge post">Post-Tennis</span>
       </div>
       <div class="meal-name">Rajma + Chana Salad with Protein Anchor</div>
-      <div class="meal-desc">Same as workout day. Tennis is high-intensity — glycogen replenishment matters. Don't skip carbs here.</div>
+      <div class="meal-desc">Tennis is high-intensity — glycogen replenishment matters. Don't skip carbs here. Same salad rotation as gym days.</div>
       <div class="meal-items">
         <span class="item-tag">100g rajma</span>
         <span class="item-tag">100g chana</span>
@@ -600,7 +808,7 @@
         <span class="meal-badge">Snack</span>
       </div>
       <div class="meal-name">Chia Jar</div>
-      <div class="meal-desc">Same as workout day.</div>
+      <div class="meal-desc">Same as gym days. Prepped night before.</div>
       <div class="macro-row">
         <span class="macro-pill p-pill">~13g protein</span>
         <span class="macro-pill c-pill">~28g carbs</span>
@@ -614,8 +822,8 @@
         <span class="meal-time">Dinner · Meal 4</span>
         <span class="meal-badge">Portable / Home</span>
       </div>
-      <div class="meal-name">Same dinner rotation as workout day</div>
-      <div class="meal-desc">Portable salad jar on busy nights. Home dinner (fish/chicken/dal+eggs) on free nights.</div>
+      <div class="meal-name">Same dinner rotation as gym days</div>
+      <div class="meal-desc">Portable salad jar on busy nights. Home rotation on free nights.</div>
       <div class="macro-row">
         <span class="macro-pill p-pill">~32–45g protein</span>
         <span class="macro-pill c-pill">~20–30g carbs</span>
@@ -625,7 +833,7 @@
     </div>
 
     <div class="flag-note">
-      ⚠️ <strong>Protein gap:</strong> Same as workout day — ~133–151g without a supplement. Add pea+rice protein shake to hit 160–180g target.
+      ⚠️ <strong>Protein gap:</strong> ~133–151g without supplement. Add pea+rice shake to hit target.
     </div>
 
     <div class="totals-card">
@@ -660,11 +868,11 @@
         <span class="meal-badge">Breakfast</span>
       </div>
       <div class="meal-name">4 Scrambled Eggs + Pumpkin Seeds</div>
-      <div class="meal-desc">Drop the sourdough on rest days — no glycogen demand. Eggs + pumpkin seeds alone is sufficient. Saves ~100 kcal and reduces unnecessary carbs.</div>
+      <div class="meal-desc">Drop the sourdough on rest days — no glycogen demand. Add vegetables for volume. Saves ~100 kcal and reduces unnecessary carbs.</div>
       <div class="meal-items">
         <span class="item-tag">4 eggs</span>
         <span class="item-tag">30g pumpkin seeds</span>
-        <span class="item-tag">vegetables (spinach/tomato)</span>
+        <span class="item-tag">spinach or tomato</span>
         <span class="item-tag">minimal butter</span>
       </div>
       <div class="macro-row">
@@ -681,7 +889,7 @@
         <span class="meal-badge">Lunch</span>
       </div>
       <div class="meal-name">Rajma + Chana Salad — reduced carb version</div>
-      <div class="meal-desc">Same salad base, no added rice or roti. Protein anchor still important — don't skip it. Reduce rajma/chana portion slightly (75g each vs 100g).</div>
+      <div class="meal-desc">Same base, no added rice or roti. Reduce rajma/chana slightly (75g each). Protein anchor still essential.</div>
       <div class="meal-items">
         <span class="item-tag">75g rajma</span>
         <span class="item-tag">75g chana</span>
@@ -719,13 +927,13 @@
         <span class="meal-badge">Light Dinner</span>
       </div>
       <div class="meal-name">Light protein + vegetables only</div>
-      <div class="meal-desc">No roti or rice at dinner on rest days. Prioritise vegetables and lean protein. Fruit dinner works well here too.</div>
+      <div class="meal-desc">No roti or rice at dinner on rest days. Prioritise vegetables and lean protein. Best day for fruit dinner option.</div>
       <div class="alt-section">
         <div class="alt-label">Options</div>
         <div class="alt-options">
           <div class="alt-option">🐟 Grilled fish (150g) + large salad + roasted veg</div>
-          <div class="alt-option">🥚 Portable salad jar (lighter — 2 eggs, smaller legume portion)</div>
-          <div class="alt-option">🍉 Fruit plate + nuts + pumpkin seeds (rest day is best day for this)</div>
+          <div class="alt-option">🥚 Portable salad jar — lighter (2 eggs, smaller legume portion)</div>
+          <div class="alt-option">🍉 Fruit plate + nuts + pumpkin seeds (best day for this)</div>
         </div>
       </div>
       <div class="macro-row" style="margin-top:0.75rem">
@@ -737,7 +945,7 @@
     </div>
 
     <div class="flag-note">
-      ⚠️ <strong>Protein gap:</strong> Rest day drops to ~117–131g — furthest from target. Most important day to add pea+rice protein shake.
+      ⚠️ <strong>Protein gap:</strong> Rest day drops to ~117–131g — furthest from target. Most important day to add pea+rice protein shake. Also consider slightly larger dinner (~1,600 kcal minimum) to avoid excessive deficit and muscle loss.
     </div>
 
     <div class="totals-card">
@@ -767,37 +975,37 @@
 
     <div class="note-item">
       <div class="note-dot warn"></div>
-      <div class="note-text"><strong>Single biggest gap: protein.</strong> Without dairy or protein powder, this plan consistently falls 20–45g short. A pea+rice blend (25g/scoop) is the cleanest fix — neutral taste, complete amino profile, no dairy. Non-negotiable if muscle building is a real goal at 41.</div>
+      <div class="note-text"><strong>Single biggest gap: protein.</strong> Without dairy or protein powder, this plan falls 20–45g short daily. A pea+rice blend (25g/scoop) is the cleanest fix — neutral taste, complete amino profile, no dairy. Non-negotiable if muscle building is a real goal at 41.</div>
     </div>
 
     <div class="note-item">
       <div class="note-dot warn"></div>
-      <div class="note-text"><strong>Calories may be too low on rest days (~1,400 kcal).</strong> Aggressive deficits on non-training days risk muscle loss and metabolic adaptation. Consider keeping rest day calories at ~1,600 kcal minimum by adding a slightly larger dinner.</div>
+      <div class="note-text"><strong>Calories too low on rest days (~1,400 kcal).</strong> Aggressive deficits on non-training days risk muscle loss and metabolic adaptation. Keep rest day calories at ~1,600 kcal minimum by adding a slightly larger dinner.</div>
     </div>
 
     <div class="note-item">
       <div class="note-dot"></div>
-      <div class="note-text"><strong>Meal 2 is the nutritional cornerstone.</strong> The rajma+chana+protein anchor combination is excellent — complete protein, high fiber, good micronutrients, batch-prep friendly. Protect this meal; don't skip or reduce it.</div>
+      <div class="note-text"><strong>Home workout day mini-fuel is intentional.</strong> Dates + walnuts + pumpkin seeds at 5:45AM provides just enough glycogen to protect muscle during resistance training without disrupting the fasted state from overnight. Skip it only on walk days.</div>
     </div>
 
     <div class="note-item">
       <div class="note-dot"></div>
-      <div class="note-text"><strong>Pumpkin seeds across 3 meals is intentional.</strong> Zinc and magnesium are commonly deficient in high-training males over 40. This plan delivers a meaningful daily dose through food rather than supplements.</div>
+      <div class="note-text"><strong>Meal 2 is the nutritional cornerstone.</strong> The rajma+chana+protein anchor combination is excellent — complete protein, high fiber, good micronutrients, batch-prep friendly. Protect this meal across all day types.</div>
     </div>
 
     <div class="note-item">
       <div class="note-dot"></div>
-      <div class="note-text"><strong>Fruit dinner (max 1x/week) is fine.</strong> It's a useful psychological release valve that keeps adherence high. Just don't stack it with the chia jar being skipped — you'll end up under 100g protein that day.</div>
+      <div class="note-text"><strong>Pumpkin seeds across 3–4 meals is intentional.</strong> Zinc and magnesium are commonly deficient in high-training males over 40. This plan delivers a meaningful daily dose through food rather than supplements.</div>
     </div>
 
     <div class="note-item">
       <div class="note-dot"></div>
-      <div class="note-text"><strong>Sprouts at dinner is a smart addition.</strong> Easy to digest, supports gut health, small protein contribution, and enzymes aid overnight recovery. Good habit.</div>
+      <div class="note-text"><strong>Fruit dinner (max 1x/week) is fine.</strong> Useful psychological release that keeps adherence high. Don't stack it on a day where chia jar was also skipped — protein will fall below 100g.</div>
     </div>
 
     <div class="note-item">
       <div class="note-dot"></div>
-      <div class="note-text"><strong>This plan aligns well with LM Kapoor's whole food framework</strong> while correcting its protein blindspot. You're getting the anti-inflammatory, high-fiber, low-processed-food foundation with enough animal protein layered on top to support real body recomposition.</div>
+      <div class="note-text"><strong>This plan aligns well with LM Kapoor's whole food framework</strong> while correcting its protein blindspot. Anti-inflammatory, high-fiber, low-processed-food foundation with enough animal protein to support real body recomposition at 41.</div>
     </div>
 
   </div>
@@ -806,14 +1014,15 @@
 
 <script>
 function showPlan(type) {
-  document.getElementById('plan-workout').style.display = type === 'workout' ? 'block' : 'none';
-  document.getElementById('plan-tennis').style.display = type === 'tennis' ? 'block' : 'none';
-  document.getElementById('plan-rest').style.display = type === 'rest' ? 'block' : 'none';
+  ['workout','home','tennis','rest'].forEach(t => {
+    document.getElementById('plan-' + t).style.display = t === type ? 'block' : 'none';
+  });
   document.querySelectorAll('.toggle-btn').forEach((b, i) => {
     b.classList.toggle('active',
       (type === 'workout' && i === 0) ||
-      (type === 'tennis' && i === 1) ||
-      (type === 'rest' && i === 2)
+      (type === 'home' && i === 1) ||
+      (type === 'tennis' && i === 2) ||
+      (type === 'rest' && i === 3)
     );
   });
 }
