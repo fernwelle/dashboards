@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{.Path}} · dashboards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#0f1218; --line:#1b2029;
+    --steel:#5a7a9a; --steel-dim:#3a5066; --text:#e6e9ee;
+    --muted:#7e8794; --faint:#4a525e; --accent:#6d97bd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--text);
+    font-family:'JetBrains Mono',ui-monospace,'Fira Code',Menlo,monospace;
+    font-size:14px;line-height:1.6;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);min-height:100vh;}
+  .wrap{max-width:760px;margin:0 auto;padding:28px 18px 64px}
+  .prompt{color:var(--muted);font-size:13px;margin-bottom:4px}
+  .prompt .sigil{color:var(--steel)}
+  .prompt .path{color:var(--text)}
+  .prompt .cursor{display:inline-block;width:7px;height:15px;background:var(--steel);
+    margin-left:3px;vertical-align:middle;animation:blink 1.1s step-end infinite;}
+  @keyframes blink{50%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.prompt .cursor{animation:none}}
+  .meta{color:var(--faint);font-size:12px;margin:14px 0 18px;letter-spacing:.02em}
+  .rule{border:0;border-top:1px solid var(--line);margin:0 0 6px}
+  ul{list-style:none}
+  .row{display:flex;align-items:baseline;gap:12px;padding:11px 10px;border-radius:6px;
+    text-decoration:none;color:var(--text);transition:background .12s ease;}
+  .row:hover,.row:focus-visible{background:var(--panel);outline:none}
+  .row:focus-visible{box-shadow:inset 0 0 0 1px var(--steel-dim)}
+  .glyph{color:var(--steel);width:1.4em;flex:none;text-align:center}
+  .glyph.dir{color:var(--accent)}
+  .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .size{color:var(--faint);font-size:12px;flex:none;min-width:60px;text-align:right}
+  .time{color:var(--muted);font-size:12px;flex:none;min-width:118px;text-align:right}
+  @media(max-width:520px){.size{display:none}.time{min-width:auto;font-size:11px}}
+  .up{color:var(--muted)}
+  .up .glyph{color:var(--faint)}
+  .empty{color:var(--faint);padding:24px 10px;font-style:italic}
+  footer{margin-top:32px;color:var(--faint);font-size:11px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="prompt">
+    <span class="sigil">dk@dashboards</span>:<span class="path">{{.Path}}</span>$ ls -la<span class="cursor"></span>
+  </div>
+  <div class="meta">{{.NumDirs}} dir · {{.NumFiles}} file{{if ne .NumFiles 1}}s{{end}}</div>
+  <hr class="rule">
+  <ul>
+    {{- if .CanGoUp}}
+    <li><a class="row up" href="..">
+      <span class="glyph">..</span>
+      <span class="name">parent directory</span>
+    </a></li>
+    {{- end}}
+    {{- $hasItem := false}}
+    {{- range .Items}}
+      {{- if not (eq .Name "browse.html")}}
+        {{- $hasItem = true}}
+    <li><a class="row" href="{{html .URL}}">
+      <span class="glyph{{if .IsDir}} dir{{end}}">{{if .IsDir}}▸{{else}}·{{end}}</span>
+      <span class="name">{{.Name}}</span>
+      <span class="size">{{if .IsDir}}—{{else}}{{.HumanSize}}{{end}}</span>
+      <span class="time">{{.HumanModTime "2006-01-02 15:04"}}</span>
+    </a></li>
+      {{- end}}
+    {{- end}}
+    {{- if not $hasItem}}
+    <li class="empty">empty — push an .html file to populate this index</li>
+    {{- end}}
+  </ul>
+  <footer>served from /srv/dashboards · tailnet only</footer>
+</div>
+</body>
+</html>
