@@ -168,7 +168,7 @@
     root * /srv/dashboards
     file_server {
         browse /srv/dashboards/browse.html
-        hide .git
+        hide .git .DS_Store
     }
     encode gzip
 }</code></pre>
@@ -176,6 +176,7 @@
     <pre><code><span class="cmt">#!/bin/bash</span>
 <span class="cmd">cd</span> ~/dashboards && /usr/bin/git pull --quiet</code></pre>
     <div class="note warn"><b>Caddyfile gotcha:</b> <code>browse</code> with a template path must live <b>inside</b> a <code>file_server { }</code> block. Putting it on one line (<code>file_server browse /path</code>) makes Caddy crash-loop with a "wrong argument count" parse error.</div>
+    <div class="note"><b>.DS_Store:</b> macOS Finder drops these into folders; they get committed and clutter the listing. Caddy <code>hide</code> keeps them out of the index, and a <code>.gitignore</code> in the Mac repo (containing <code>.DS_Store</code>) keeps them out of the repo. Use both.</div>
   </section>
 
   <!-- TROUBLESHOOTING -->
