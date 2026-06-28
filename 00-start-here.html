@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Start Here — Morning Ritual</title>
+<title>Start Here — Daily Schedule</title>
 <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Lato:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -16,99 +16,130 @@
 body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.65}
 
 /* ── HERO ── */
-.hero{background:var(--ink);color:var(--paper);padding:60px 64px 52px;position:relative;overflow:hidden}
+.hero{background:var(--ink);color:var(--paper);padding:58px 64px 50px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background-image:
   repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px),
   repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px);}
-.hero-inner{position:relative;max-width:680px;margin:0 auto}
+.hero-inner{position:relative;max-width:700px;margin:0 auto}
 .hero-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--accent2);margin-bottom:24px;display:flex;align-items:center;gap:14px}
+  color:var(--accent2);margin-bottom:22px;display:flex;align-items:center;gap:14px}
 .hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--accent2)}
-.hero h1{font-family:var(--serif);font-size:52px;font-weight:700;line-height:1.05;color:#fff;
-  letter-spacing:-.02em;margin-bottom:16px}
+.hero h1{font-family:var(--serif);font-size:50px;font-weight:700;line-height:1.05;color:#fff;
+  letter-spacing:-.02em;margin-bottom:14px}
 .hero h1 em{color:var(--accent2);font-style:normal}
-.hero-sub{font-size:15px;font-weight:300;color:rgba(255,255,255,.5);max-width:480px;margin-bottom:22px}
+.hero-sub{font-size:15px;font-weight:300;color:rgba(255,255,255,.5);max-width:500px;margin-bottom:22px}
 .hero-meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:rgba(255,255,255,.62);display:flex;align-items:center;gap:12px}
 .hero-meta .clock{color:var(--accent2);font-weight:500}
 .hero-meta .dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.3)}
 
 /* ── PAGE ── */
-.page{max-width:680px;margin:0 auto;padding:40px 64px 90px}
+.page{max-width:700px;margin:0 auto;padding:36px 64px 84px}
+
+/* ── NOW STRIP ── */
+.nowstrip{display:flex;align-items:center;gap:14px;background:var(--paper2);
+  border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;
+  padding:13px 18px;margin-bottom:30px}
+.nowstrip .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);flex:none}
+.nowstrip .cur{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nowstrip .ct{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;flex:none}
 
 /* ── PROGRESS ── */
-.progress{margin-bottom:44px}
+.progress{margin-bottom:40px}
 .progress-row{display:flex;align-items:baseline;gap:10px;margin-bottom:9px;
   font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .progress-row b{color:var(--ink);font-weight:700}
 .progress-row .all{color:var(--prog);margin-left:auto}
+.reset{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:0;color:var(--accent);cursor:pointer;padding:2px 0}
+.reset:hover{color:var(--ink)}
+.progress-row .reset{margin-left:18px}
 .track{height:4px;background:var(--paper3);border-radius:4px;overflow:hidden}
 .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s ease}
 @media(prefers-reduced-motion:reduce){.track i{transition:none}}
 
 /* ── PHASE / SECTION HEADER ── */
-.phase{margin-bottom:46px}
-.section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:22px;
+.phase{margin-bottom:42px}
+.section-header{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;
   padding-bottom:12px;border-bottom:2px solid var(--ink);transition:border-color .2s}
 .section-num{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--muted)}
-.section-title{font-family:var(--serif);font-size:23px;font-weight:700;letter-spacing:-.01em}
-.section-sub{font-family:var(--sans);font-size:12px;color:var(--muted);font-style:italic;margin-left:auto}
-.now-chip{display:none;font-family:var(--mono);font-style:normal;font-size:10px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--accent);align-self:center}
+.section-title{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em}
+.now-chip{display:none;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);align-items:center}
 .now-chip .pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);
-  margin-right:6px;vertical-align:middle;animation:beat 1.6s ease-in-out infinite}
+  margin-right:6px;animation:beat 1.6s ease-in-out infinite}
 @keyframes beat{0%,100%{opacity:1}50%{opacity:.25}}
 @media(prefers-reduced-motion:reduce){.now-chip .pulse{animation:none}}
+.section-meta{margin-left:auto;display:flex;align-items:baseline;gap:12px}
+.section-sub{font-family:var(--sans);font-size:12px;color:var(--muted);font-style:italic}
+.section-count{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.section-count.full{color:var(--prog)}
 .phase.now .section-header{border-bottom-color:var(--accent)}
-.phase.now .section-sub{display:none}
-.phase.now .now-chip{display:inline-flex;margin-left:auto}
+.phase.now .now-chip{display:inline-flex}
 
-/* ── CARD ── */
-.card{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper);margin-bottom:12px}
-.card.timed.now{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
-.card-head{padding:9px 16px;display:flex;align-items:center;gap:10px;
+/* ── BLOCK ── */
+.block{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper);margin-bottom:11px}
+.block.now{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
+.block-head{padding:9px 16px;display:flex;align-items:center;gap:11px;
   border-bottom:1px solid var(--line);background:var(--paper2)}
+.b-time{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--ink)}
 .tag{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
   padding:3px 8px;border-radius:3px;color:#fff;background:var(--c)}
-.head-note{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--muted);margin-left:auto}
-.head-note.urgent{color:var(--accent);font-weight:700}
-.head-note.full{color:var(--prog)}
+.b-now{display:none;margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--c);align-items:center}
+.b-now .pulse{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--c);
+  margin-right:5px;animation:beat 1.6s ease-in-out infinite}
+.block.now .b-now{display:inline-flex}
 
-/* ── TASK ROW ── */
-.card-body{padding:5px 0}
-.task{display:flex;gap:13px;align-items:flex-start;padding:11px 16px;cursor:pointer;
+.task{display:flex;gap:13px;align-items:flex-start;padding:12px 16px;cursor:pointer;
   -webkit-tap-highlight-color:transparent;user-select:none;min-height:46px;transition:background .12s}
 .task:hover{background:var(--paper2)}
-.task:focus-visible{outline:none;background:var(--paper2);box-shadow:inset 2px 0 0 var(--c)}
+.task:focus-visible{outline:none;background:var(--paper2);box-shadow:inset 3px 0 0 var(--c)}
 .check{flex:none;width:20px;height:20px;margin-top:1px;border:1.5px solid var(--line);border-radius:5px;
   background:var(--paper);position:relative;transition:background .14s,border-color .14s}
 .task.done .check{background:var(--c);border-color:var(--c)}
 .check::after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;
-  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) scale(0);
-  transform-origin:center;transition:transform .14s ease}
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) scale(0);transition:transform .14s ease}
 .task.done .check::after{transform:rotate(45deg) scale(1)}
 @media(prefers-reduced-motion:reduce){.check,.check::after{transition:none}}
 .t-body{flex:1;min-width:0}
 .t-label{font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.35;color:var(--ink)}
 .task.done .t-label{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
 .t-desc{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5}
-.t-time{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
-  color:var(--muted);margin-top:3px}
+
+/* ── GUARDRAILS ── */
+.callout{display:flex;gap:13px;background:var(--paper2);border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:8px;padding:14px 16px;margin:34px 0}
+.callout .ic{font-size:16px;line-height:1.4}
+.callout h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:6px}
+.callout li{list-style:none;font-size:13px;color:var(--ink);padding-left:14px;position:relative;margin:3px 0}
+.callout li::before{content:'—';position:absolute;left:0;color:var(--muted)}
+
+/* ── GOALS ── */
+.goals{border-top:1px solid var(--line);padding-top:26px;margin-top:36px}
+.goals .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px}
+.goal{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--paper3)}
+.goal:last-child{border-bottom:none}
+.goal .gn{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);flex:none;margin-top:2px}
+.goal .gt{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink)}
+.goal .gd{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
 
 /* ── FOOTER ── */
-.footer{border-top:1px solid var(--line);padding:20px 64px;max-width:680px;margin:0 auto;
-  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:12px}
-.footer .reset{font:inherit;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-  background:none;border:0;color:var(--accent);cursor:pointer;padding:0}
-.footer .reset:hover{color:var(--ink)}
+.footer{border-top:1px solid var(--line);padding:20px 64px;max-width:700px;margin:0 auto;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  display:flex;justify-content:space-between;align-items:center;gap:12px}
 
 @media(max-width:700px){
-  .hero{padding:44px 26px 38px}
-  .hero h1{font-size:38px}
-  .page{padding:30px 26px 64px}
-  .footer{padding:20px 26px;flex-direction:column;gap:8px;align-items:flex-start}
+  .hero{padding:42px 24px 36px}
+  .hero h1{font-size:36px}
+  .page{padding:28px 24px 60px}
+  .nowstrip{flex-wrap:wrap;gap:8px}
+  .nowstrip .ct{margin-left:0;width:100%}
+  .footer{padding:20px 24px;flex-direction:column;gap:8px;align-items:flex-start}
 }
 </style>
 </head>
@@ -117,123 +148,172 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:
 <!-- ══ HERO ══ -->
 <div class="hero">
   <div class="hero-inner">
-    <div class="hero-eyebrow">Morning Operating System</div>
+    <div class="hero-eyebrow">Daily Schedule</div>
     <h1>Start <em>Here</em></h1>
-    <p class="hero-sub">The first six hours, one block at a time. Work down the list — nothing else needs your attention yet.</p>
-    <div class="hero-meta">
-      <span id="date">—</span><span class="dot"></span><span class="clock" id="clock">--:--</span>
-    </div>
+    <p class="hero-sub">Wake to rest, one block at a time. Be where the clock says you are — nothing else needs you yet.</p>
+    <div class="hero-meta"><span id="date">—</span><span class="dot"></span><span class="clock" id="clock">--:--</span></div>
   </div>
 </div>
 
 <!-- ══ MAIN ══ -->
 <div class="page">
 
+  <!-- NOW -->
+  <div class="nowstrip">
+    <span class="lbl" id="ns-label">Right now</span>
+    <span class="cur" id="ns-cur">—</span>
+    <span class="ct" id="ns-time"></span>
+  </div>
+
   <!-- PROGRESS -->
   <div class="progress">
-    <div class="progress-row"><span>Complete</span><b id="count">0 / 0</b><span class="all" id="alldone"></span></div>
+    <div class="progress-row"><span>Day complete</span><b id="count">0 / 0</b><span class="all" id="alldone"></span><button class="reset" id="reset">Reset day</button></div>
     <div class="track"><i id="barfill"></i></div>
   </div>
 
-  <!-- ── PHASE 1 ── -->
-  <section class="phase" data-start="240" data-end="420">
+  <!-- ── PHASE 1 · SADHANA ── -->
+  <section class="phase" data-start="180" data-end="360">
     <div class="section-header">
-      <span class="section-num">01</span>
-      <h2 class="section-title">Worship &amp; Foundations</h2>
-      <span class="section-sub">04:00 – 07:00</span>
+      <span class="section-num">01</span><h2 class="section-title">Sādhana</h2>
       <span class="now-chip"><span class="pulse"></span>now</span>
+      <span class="section-meta"><span class="section-sub">03:00 – 06:00</span><span class="section-count" data-count></span></span>
     </div>
 
-    <div class="card" style="--c:var(--math)">
-      <div class="card-head"><span class="tag">Worship</span><span class="head-note" data-count></span></div>
-      <div class="card-body">
-        <div class="task" data-id="w-gratitude" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Gratitude meditation</span></div></div>
-        <div class="task" data-id="w-pranayama" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Pranayama</span></div></div>
-        <div class="task" data-id="w-chalisa" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Hanuman Chalisa ×21</span></div></div>
-        <div class="task" data-id="w-dhyana" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Dhyana</span></div></div>
-        <div class="task" data-id="w-yagya" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Yagya</span></div></div>
-      </div>
+    <div class="block" data-start="180" data-end="210" style="--c:var(--math)">
+      <div class="block-head"><span class="b-time">03:00 – 03:30</span><span class="tag">Rise</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="rise" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Wake up + shower</span></div></div>
     </div>
 
-    <div class="card" style="--c:var(--ai)">
-      <div class="card-head"><span class="tag">Planning</span><span class="head-note" data-count></span></div>
-      <div class="card-body">
-        <div class="task" data-id="p-self" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Plan my day</span>
-          <span class="t-desc">Personal · admin · work</span></div></div>
-        <div class="task" data-id="p-raam" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Plan Raam's day</span>
-          <span class="t-desc">Coding · math · electronics</span></div></div>
-        <div class="task" data-id="p-discord" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Update Raam's Discord</span></div></div>
-      </div>
+    <div class="block" data-start="210" data-end="300" style="--c:var(--math)">
+      <div class="block-head"><span class="b-time">03:30 – 05:00</span><span class="tag">Jaap</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="ons" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">ONS Jaap + Dhyaan</span>
+        <span class="t-desc">Full awareness, breath hold, golden visualisation — quality over quantity</span></div></div>
     </div>
 
-    <div class="card" style="--c:var(--lang)">
-      <div class="card-head"><span class="tag">Meal</span><span class="head-note">Phase 1</span></div>
-      <div class="card-body">
-        <div class="task" data-id="meal" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Eat a meal</span>
-          <span class="t-desc">Per the Daily Meal Framework</span></div></div>
-      </div>
-    </div>
-
-    <div class="card" style="--c:var(--prog)">
-      <div class="card-head"><span class="tag">Speech</span><span class="head-note">Phase 1</span></div>
-      <div class="card-body">
-        <div class="task" data-id="speech" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Speech practice</span></div></div>
-      </div>
+    <div class="block" data-start="300" data-end="360" style="--c:var(--math)">
+      <div class="block-head"><span class="b-time">05:00 – 06:00</span><span class="tag">Yagya</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="yagya" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Yagya</span></div></div>
     </div>
   </section>
 
-  <!-- ── PHASE 2 ── -->
-  <section class="phase" data-start="420" data-end="600">
+  <!-- ── PHASE 2 · MORNING ── -->
+  <section class="phase" data-start="360" data-end="585">
     <div class="section-header">
-      <span class="section-num">02</span>
-      <h2 class="section-title">Out the Door</h2>
-      <span class="section-sub">07:00 – 10:00</span>
+      <span class="section-num">02</span><h2 class="section-title">Out the Door</h2>
       <span class="now-chip"><span class="pulse"></span>now</span>
+      <span class="section-meta"><span class="section-sub">06:00 – 09:45</span><span class="section-count" data-count></span></span>
     </div>
 
-    <div class="card" style="--c:var(--accent)">
-      <div class="card-head"><span class="tag">School</span><span class="head-note urgent">Leave by 07:00</span></div>
-      <div class="card-body">
-        <div class="task" data-id="school" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Drop kids to school</span></div></div>
-      </div>
+    <div class="block" data-start="360" data-end="390" style="--c:var(--accent)">
+      <div class="block-head"><span class="b-time">06:00 – 06:30</span><span class="tag">Move</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="exercise" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Exercise at home</span></div></div>
     </div>
 
-    <div class="card timed" data-start="525" data-end="585" style="--c:var(--accent2)">
-      <div class="card-head"><span class="tag">Gym</span><span class="head-note">08:45 – 09:45</span></div>
-      <div class="card-body">
-        <div class="task" data-id="gym" role="checkbox" aria-checked="false" tabindex="0">
-          <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Gym</span>
-          <span class="t-time">60 minutes</span></div></div>
-      </div>
+    <div class="block" data-start="390" data-end="420" style="--c:var(--accent)">
+      <div class="block-head"><span class="b-time">06:30 – 07:00</span><span class="tag">Fuel</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="breakfast" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Eat breakfast, feed dogs</span></div></div>
+    </div>
+
+    <div class="block" data-start="420" data-end="480" style="--c:var(--accent)">
+      <div class="block-head"><span class="b-time">07:00 – 08:00</span><span class="tag">School</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="raam-school" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Raam — school round</span></div></div>
+    </div>
+
+    <div class="block" data-start="480" data-end="520" style="--c:var(--accent)">
+      <div class="block-head"><span class="b-time">08:00 – 08:40</span><span class="tag">School</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="radhha-school" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Radhha — school round</span></div></div>
+    </div>
+
+    <div class="block" data-start="525" data-end="585" style="--c:var(--accent)">
+      <div class="block-head"><span class="b-time">08:45 – 09:45</span><span class="tag">Gym</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="gym" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Gym</span></div></div>
     </div>
   </section>
+
+  <!-- ── PHASE 3 · DEEP WORK ── -->
+  <section class="phase" data-start="630" data-end="960">
+    <div class="section-header">
+      <span class="section-num">03</span><h2 class="section-title">Deep Work</h2>
+      <span class="now-chip"><span class="pulse"></span>now</span>
+      <span class="section-meta"><span class="section-sub">10:30 – 16:00</span><span class="section-count" data-count></span></span>
+    </div>
+
+    <div class="block" data-start="630" data-end="960" style="--c:var(--ai)">
+      <div class="block-head"><span class="b-time">10:30 – 16:00</span><span class="tag">Deep Work</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="deep-work" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Deep Work Window</span>
+        <span class="t-desc">Clear goals, step-wise progress — log every update in Notion</span></div></div>
+    </div>
+  </section>
+
+  <!-- ── PHASE 4 · EVENING ── -->
+  <section class="phase" data-start="960" data-end="1260">
+    <div class="section-header">
+      <span class="section-num">04</span><h2 class="section-title">Evening</h2>
+      <span class="now-chip"><span class="pulse"></span>now</span>
+      <span class="section-meta"><span class="section-sub">16:00 – 21:00</span><span class="section-count" data-count></span></span>
+    </div>
+
+    <div class="block" data-start="960" data-end="1200" style="--c:var(--lang)">
+      <div class="block-head"><span class="b-time">16:00 – 20:00</span><span class="tag">Work + Kids</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="work-kids" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Work + Kids Window</span></div></div>
+    </div>
+
+    <div class="block" data-start="1200" data-end="1260" style="--c:var(--math)">
+      <div class="block-head"><span class="b-time">20:00 – 21:00</span><span class="tag">Jaap</span><span class="b-now"><span class="pulse"></span>now</span></div>
+      <div class="task" data-id="jaap-bed" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="check" aria-hidden="true"></span><div class="t-body"><span class="t-label">Jaap while in bed</span></div></div>
+    </div>
+  </section>
+
+  <!-- GUARDRAILS -->
+  <div class="callout">
+    <span class="ic">⛔</span>
+    <div>
+      <h4>Daily guardrails</h4>
+      <ul>
+        <li>Stop eating at sunset — only water &amp; green tea within 3 hours of bed</li>
+        <li>No soft drinks or sugary drinks</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="goals">
+    <div class="eyebrow">North Star</div>
+    <div class="goal"><span class="gn">01</span><div><span class="gt">Strict ONS upāsana</span><span class="gd">Quality over quantity — full awareness, gratitude, and love</span></div></div>
+    <div class="goal"><span class="gn">02</span><div><span class="gt">Perfect lifestyle</span><span class="gd">Diet + fitness, held to the hard rules above</span></div></div>
+    <div class="goal"><span class="gn">03</span><div><span class="gt">Unwavering focus on work</span><span class="gd">Clear goals, step-wise progress, tracked in Notion</span></div></div>
+    <div class="goal"><span class="gn">04</span><div><span class="gt">Kids' education &amp; wellbeing</span><span class="gd">Raam and Radhha's daily plan</span></div></div>
+  </div>
 
 </div>
 
 <div class="footer">
-  <span>Start Here · Morning Ritual</span>
-  <button class="reset" id="reset">Reset day</button>
+  <span>Start Here · Daily Schedule</span>
+  <span>tailnet only</span>
 </div>
 
 <script>
 (function(){
-  var tasks = Array.prototype.slice.call(document.querySelectorAll('.task'));
+  var tasks  = Array.prototype.slice.call(document.querySelectorAll('.task'));
+  var blocks = Array.prototype.slice.call(document.querySelectorAll('.block'));
   var todayKey = 'start-here:' + new Date().toISOString().slice(0,10);
 
   function load(){ try{ return new Set(JSON.parse(localStorage.getItem(todayKey)||'[]')); }catch(e){ return new Set(); } }
   function save(s){ try{ localStorage.setItem(todayKey, JSON.stringify(Array.prototype.slice.call(s))); }catch(e){} }
   var checked = load();
+
+  function fmt(m){ return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
 
   function paint(){
     var done = 0;
@@ -246,9 +326,9 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:
     document.getElementById('count').textContent = done + ' / ' + tasks.length;
     document.getElementById('barfill').style.width = (tasks.length ? done/tasks.length*100 : 0) + '%';
     document.getElementById('alldone').textContent = (tasks.length && done===tasks.length) ? '✓ all done' : '';
-    document.querySelectorAll('.card').forEach(function(c){
-      var note = c.querySelector('[data-count]'); if(!note) return;
-      var rows = c.querySelectorAll('.task'), d = 0;
+    document.querySelectorAll('.phase').forEach(function(p){
+      var note = p.querySelector('[data-count]'); if(!note) return;
+      var rows = p.querySelectorAll('.task'), d = 0;
       rows.forEach(function(r){ if(checked.has(r.dataset.id)) d++; });
       note.textContent = d + ' / ' + rows.length;
       note.classList.toggle('full', d===rows.length);
@@ -263,29 +343,44 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:
 
   tasks.forEach(function(t){
     t.addEventListener('click', function(){ toggle(t); });
-    t.addEventListener('keydown', function(e){
-      if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggle(t); }
-    });
+    t.addEventListener('keydown', function(e){ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggle(t); } });
   });
+  document.getElementById('reset').addEventListener('click', function(){ checked.clear(); save(checked); paint(); });
 
-  document.getElementById('reset').addEventListener('click', function(){
-    checked.clear(); save(checked); paint();
-  });
-
-  function pad(n){ return String(n).padStart(2,'0'); }
   function tick(){
     var now = new Date(), mins = now.getHours()*60 + now.getMinutes();
-    document.getElementById('clock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    document.getElementById('clock').textContent = fmt(mins);
     document.getElementById('date').textContent =
       now.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+
     document.querySelectorAll('.phase').forEach(function(p){
       var s=+p.dataset.start, e=+p.dataset.end;
       p.classList.toggle('now', mins>=s && mins<e);
     });
-    document.querySelectorAll('.timed').forEach(function(c){
-      var s=+c.dataset.start, e=+c.dataset.end;
-      c.classList.toggle('now', mins>=s && mins<e);
+
+    var cur=null, next=null;
+    blocks.forEach(function(b){
+      var s=+b.dataset.start, e=+b.dataset.end;
+      var on = mins>=s && mins<e;
+      b.classList.toggle('now', on);
+      if(on) cur=b;
+      if(s>mins && (!next || s < +next.dataset.start)) next=b;
     });
+
+    var lbl=document.getElementById('ns-label'), curEl=document.getElementById('ns-cur'), tEl=document.getElementById('ns-time');
+    if(cur){
+      lbl.textContent='Right now';
+      curEl.textContent=cur.querySelector('.t-label').textContent;
+      tEl.textContent='until '+fmt(+cur.dataset.end);
+    } else if(next){
+      lbl.textContent='Up next';
+      curEl.textContent=next.querySelector('.t-label').textContent;
+      tEl.textContent='at '+fmt(+next.dataset.start);
+    } else {
+      lbl.textContent='Day complete';
+      curEl.textContent='Rest well';
+      tEl.textContent='';
+    }
   }
 
   paint(); tick(); setInterval(tick, 30000);
