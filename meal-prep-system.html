@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Box System — Meal Prep Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#17150f;
+    --surface:#211e17;
+    --surface-2:#2a261d;
+    --border:#3a3427;
+    --text:#ece6d7;
+    --muted:#9c9280;
+    --faint:#6f6858;
+    --amber:#e0a53a;
+    --amber-dim:#a87d2c;
+    --green:#8fb35a;
+    --green-dim:#5f7a3c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    font-size:16px;
+    padding:0 0 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px}
+
+  /* header */
+  header{padding:34px 0 20px;text-align:left}
+  .eyebrow{
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--amber);font-weight:600;margin-bottom:10px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:900;
+    font-size:clamp(34px,8vw,52px);line-height:.98;letter-spacing:-.01em;
+  }
+  h1 em{font-style:italic;color:var(--amber)}
+  .sub{color:var(--muted);margin-top:12px;font-size:15px;max-width:52ch}
+
+  /* the formula strip */
+  .formula{
+    margin:22px 0 4px;padding:14px 16px;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--radius);
+    font-size:13.5px;color:var(--muted);
+    display:flex;flex-wrap:wrap;gap:8px 6px;align-items:center;
+  }
+  .formula b{color:var(--green);font-weight:600}
+  .formula .plus{color:var(--faint)}
+  .formula .sep{color:var(--amber);font-weight:700}
+
+  /* tabs */
+  nav{
+    position:sticky;top:0;z-index:10;background:var(--bg);
+    padding:14px 0 12px;margin-top:8px;
+    border-bottom:1px solid var(--border);
+  }
+  .tabs{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    flex:0 0 auto;padding:9px 15px;border-radius:999px;cursor:pointer;
+    background:var(--surface);border:1px solid var(--border);
+    color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .tab:hover{color:var(--text);border-color:var(--amber-dim)}
+  .tab.active{background:var(--amber);color:#1a1508;border-color:var(--amber)}
+
+  /* panels */
+  main{padding-top:26px}
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{
+    font-family:'Fraunces',serif;font-weight:600;font-size:26px;
+    margin-bottom:6px;letter-spacing:-.01em;
+  }
+  .lead{color:var(--muted);margin-bottom:22px;font-size:15px}
+
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:18px 18px;margin-bottom:16px;
+  }
+  .card h3{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--amber);font-weight:700;margin-bottom:12px;
+  }
+  .card h3.green{color:var(--green)}
+
+  ul.clean{list-style:none}
+  ul.clean li{
+    padding:7px 0 7px 20px;position:relative;font-size:15px;
+    border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{
+    content:"";position:absolute;left:2px;top:15px;
+    width:6px;height:6px;border-radius:2px;background:var(--green-dim);
+  }
+  ul.clean li b{color:var(--text);font-weight:600}
+  .amt{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums}
+
+  /* macro chips */
+  .macros{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .chip{
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:10px;padding:8px 13px;font-size:13px;color:var(--muted);
+  }
+  .chip b{color:var(--amber);font-size:17px;font-family:'Fraunces',serif;font-weight:600}
+
+  /* numbered steps */
+  ol.steps{list-style:none;counter-reset:s}
+  ol.steps li{
+    counter-increment:s;position:relative;padding:11px 0 11px 42px;
+    border-bottom:1px solid rgba(255,255,255,.05);font-size:15px;
+  }
+  ol.steps li:last-child{border-bottom:none}
+  ol.steps li::before{
+    content:counter(s);position:absolute;left:0;top:10px;
+    width:27px;height:27px;border-radius:50%;
+    background:var(--surface-2);border:1px solid var(--amber-dim);
+    color:var(--amber);font-weight:700;font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  ol.steps li b{color:var(--text)}
+
+  /* table */
+  .tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+  .tbl th{
+    text-align:left;padding:10px 10px;color:var(--faint);
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+    border-bottom:1px solid var(--border);
+  }
+  .tbl td{padding:11px 10px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl .day{color:var(--amber);font-weight:700;font-family:'Fraunces',serif}
+  .fish{color:var(--green);font-weight:600}
+
+  .note{
+    display:flex;gap:11px;padding:13px 15px;margin-top:8px;
+    background:rgba(224,165,58,.07);border:1px solid var(--amber-dim);
+    border-radius:12px;font-size:14px;color:var(--text);
+  }
+  .note .ic{color:var(--amber);font-weight:800;flex:0 0 auto}
+  .note.g{background:rgba(143,179,90,.07);border-color:var(--green-dim)}
+  .note.g .ic{color:var(--green)}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.split{grid-template-columns:1fr}}
+
+  .recipe{margin-bottom:14px}
+  .recipe .rhead{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .recipe .rnum{
+    font-family:'Fraunces',serif;font-weight:900;font-size:20px;color:var(--green);
+    line-height:1;
+  }
+  .recipe .rname{font-weight:700;font-size:16px}
+  .recipe .rtag{font-size:12.5px;color:var(--muted);margin-left:auto;text-align:right}
+  .recipe .ing{font-size:14px;color:var(--muted);padding:8px 0 4px}
+  .recipe .ing span{color:var(--text)}
+  .recipe .meta{font-size:13px;color:var(--faint);border-top:1px solid rgba(255,255,255,.05);padding-top:8px}
+  .recipe .meta b{color:var(--green-dim)}
+
+  .ratio{
+    display:inline-block;background:var(--surface-2);border:1px solid var(--border);
+    border-radius:7px;padding:2px 9px;font-size:12px;color:var(--amber);
+    font-weight:600;font-variant-numeric:tabular-nums;
+  }
+  /* skeleton component grid */
+  .skeleton{margin:22px 0 4px}
+  .skeleton .cap{font-size:13.5px;color:var(--muted);margin-bottom:11px}
+  .skeleton .cap b{color:var(--text);font-weight:600}
+  .skeleton .cap .cg{color:var(--green);font-weight:700}
+  .compgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  @media(max-width:560px){.compgrid{grid-template-columns:repeat(2,1fr)}}
+  .comp{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:12px 13px 13px;position:relative;
+  }
+  .comp .n{
+    position:absolute;top:9px;right:12px;font-family:'Fraunces',serif;
+    font-weight:900;font-size:16px;color:var(--faint);line-height:1;
+  }
+  .comp .cname{font-weight:600;font-size:14.5px;color:var(--text);padding-right:18px;line-height:1.25}
+  .comp .cnote{font-size:12px;color:var(--muted);margin-top:3px}
+  .comp.pick{border-color:var(--green-dim);background:rgba(143,179,90,.06)}
+  .comp.pick .n{color:var(--green)}
+  .comp.pick .tag{
+    display:inline-block;margin-top:7px;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--green);font-weight:700;
+    border:1px solid var(--green-dim);border-radius:6px;padding:1px 7px;
+  }
+  .side-item{
+    grid-column:1/-1;background:var(--surface-2);border:1px dashed var(--amber-dim);
+    border-radius:12px;padding:11px 14px;font-size:13.5px;color:var(--muted);
+  }
+  .side-item b{color:var(--amber)}
+
+  /* pick-lists */
+  .picker{margin-top:14px}
+  .picker:first-of-type{margin-top:2px}
+  .pk-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:9px}
+  .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .opt{
+    background:var(--surface-2);border:1px solid var(--border);border-radius:999px;
+    padding:8px 15px;font-size:14px;color:var(--text);font-weight:600;
+  }
+  .opt small{color:var(--muted);font-weight:400}
+  .opt.home{border-color:var(--green-dim);background:rgba(143,179,90,.05)}
+
+  /* layered box cross-section */
+  .boxviz{max-width:430px;margin:4px auto 0}
+  .lid{
+    text-align:center;font-size:11.5px;color:var(--amber);letter-spacing:.03em;
+    border:1px dashed var(--amber-dim);border-bottom:none;
+    border-radius:12px 12px 0 0;padding:8px 10px;background:rgba(224,165,58,.06);
+  }
+  .boxbody{
+    border:2px solid var(--border);border-top:none;
+    border-radius:0 0 16px 16px;overflow:hidden;display:flex;flex-direction:column;
+  }
+  .blayer{padding:13px 15px;position:relative}
+  .blayer .bl-tag{
+    font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;
+    margin-bottom:3px;display:block;
+  }
+  .blayer .bl-txt{font-size:14.5px;font-weight:700;color:#1c1912;line-height:1.2}
+  .blayer .bl-sub{font-size:12px;color:#3c3626;margin-top:2px}
+  .bl-greens{background:linear-gradient(160deg,#b3ce76,#8fb35a)}
+  .bl-greens .bl-tag{color:#31401b}
+  .bl-tom{background:linear-gradient(160deg,#dd8d5c,#cf7746)}
+  .bl-tom .bl-tag{color:#48210f}
+  .bl-base{background:linear-gradient(160deg,#e6bd63,#d9a53a)}
+  .bl-base .bl-tag{color:#4a3410}
+  .sidecar{
+    max-width:430px;margin:13px auto 0;text-align:center;font-size:13px;
+    color:var(--text);padding:11px 15px;border:1px dashed var(--border);border-radius:12px;
+  }
+  .sidecar b{color:var(--amber);font-weight:600}
+  .sidecar .arw{color:var(--faint);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-right:6px}
+
+  /* chosen-slot highlight in example lists */
+  ul.clean li.chosen::before{background:var(--green);width:8px;height:8px;top:14px;border-radius:2px}
+  ul.clean li.chosen b{color:var(--green)}
+  ul.clean li .pin{
+    font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);
+    font-weight:700;margin-left:7px;border:1px solid var(--green-dim);
+    border-radius:5px;padding:1px 6px;white-space:nowrap;
+  }
+
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);
+    color:var(--faint);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meal Prep · Cutting Phase</div>
+    <h1>The <em>Box</em> System</h1>
+    <p class="sub">One formula, prepped the night before. No decisions at 7am, no excuse to skip a meal — open the box and eat.</p>
+    <div class="skeleton">
+      <div class="cap">Every box = <b>6 components + dressing on the side</b>. Four are fixed. Two — <span class="cg">the legume and the protein</span> — you choose.</div>
+      <div class="compgrid">
+        <div class="comp"><span class="n">1</span><div class="cname">Salad greens</div><div class="cnote">lettuce — the bulk</div></div>
+        <div class="comp"><span class="n">2</span><div class="cname">Tomato · onion · cucumber</div><div class="cnote">the fresh veg</div></div>
+        <div class="comp pick"><span class="n">3</span><div class="cname">A legume</div><span class="tag">you choose</span></div>
+        <div class="comp pick"><span class="n">4</span><div class="cname">A protein</div><span class="tag">you choose</span></div>
+        <div class="comp"><span class="n">5</span><div class="cname">Pumpkin seeds + hemp</div><div class="cnote">1 tbsp each</div></div>
+        <div class="comp"><span class="n">6</span><div class="cname">Nutritional yeast</div><div class="cnote">1 tbsp, dusted</div></div>
+        <div class="side-item"><b>+ Dressing — packed separate.</b> Added only when you eat, never the night before.</div>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="tabs">
+      <button class="tab active" data-p="box">The Box</button>
+      <button class="tab" data-p="week">The Week</button>
+      <button class="tab" data-p="protein">Proteins</button>
+      <button class="tab" data-p="legume">Legumes</button>
+      <button class="tab" data-p="boost">Boosters</button>
+      <button class="tab" data-p="pack">Packing</button>
+      <button class="tab" data-p="dress">Dressings</button>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ============ THE BOX ============ -->
+    <section class="panel active" id="box">
+      <h2>Build any box in 3 moves</h2>
+      <p class="lead">The skeleton never changes — slots 1, 2, 5, 6 go in every single box. All you decide is the <b>legume</b> and the <b>protein</b>. Choose them, layer everything in, keep the extras for eating time.</p>
+
+      <!-- MOVE 1 -->
+      <div class="card">
+        <h3 class="green">1 · Fill the two open slots</h3>
+        <div class="picker">
+          <div class="pk-label">Slot 3 · legume — pick one</div>
+          <div class="opts">
+            <span class="opt">Rajma</span>
+            <span class="opt">Chana</span>
+            <span class="opt">Sprouts <small>ready-bought</small></span>
+          </div>
+        </div>
+        <div class="picker">
+          <div class="pk-label">Slot 4 · protein — pick one</div>
+          <div class="opts">
+            <span class="opt">Air-fryer chicken <small>batch</small></span>
+            <span class="opt">Boiled eggs</span>
+            <span class="opt">Tofu <small>+ dal</small></span>
+            <span class="opt home">Fish <small>home &amp; hot only — never a cold box</small></span>
+          </div>
+        </div>
+        <div class="note g" style="margin-top:16px">
+          <span class="ic">i</span>
+          <span>The chicken/eggs/tofu above are <b>interchangeable choices</b>, not fixed ingredients. The other four slots <b>are</b> fixed — greens, the tomato/onion/cucumber, pumpkin seeds + hemp, and nutritional yeast go in every box no matter what you picked.</span>
+        </div>
+      </div>
+
+      <!-- MOVE 2 -->
+      <div class="card">
+        <h3>2 · Layer it into the box</h3>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Heavy and wet on the bottom, greens loose on top so they never sit in moisture. This is what a packed box looks like in cross-section:</p>
+        <div class="boxviz">
+          <div class="lid">▲ lid + folded paper towel — catches condensation</div>
+          <div class="boxbody">
+            <div class="blayer bl-greens">
+              <span class="bl-tag">Top layer · slot 1</span>
+              <span class="bl-txt">Greens — loose, piled on top</span>
+              <span class="bl-sub">float above the wet zone, stay crisp overnight</span>
+            </div>
+            <div class="blayer bl-tom">
+              <span class="bl-tag">Own corner · slot 2</span>
+              <span class="bl-txt">Tomato — kept apart, never pre-salted</span>
+              <span class="bl-sub">it weeps most; salt would soften everything</span>
+            </div>
+            <div class="blayer bl-base">
+              <span class="bl-tag">Base · wet &amp; heavy · slots 3 · 4 · 2</span>
+              <span class="bl-txt">Protein + legume + cucumber + onion</span>
+              <span class="bl-sub">cold protein into a cold box — never warm</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidecar"><span class="arw">add when you eat</span> <b>dressing</b> · pumpkin seeds + hemp · nutritional yeast · avocado</div>
+      </div>
+
+      <!-- MOVE 3 -->
+      <div class="card">
+        <h3>3 · Keep the extras separate</h3>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:0">Dressing rides in its own small cup. Seeds, hemp, nutritional yeast and (in-season) avocado go in a tiny pouch or a desk stash — <b style="color:var(--text)">all added at eating time</b>, so nothing wilts or goes soggy in the box.</p>
+      </div>
+
+      <!-- WORKED EXAMPLE -->
+      <h2 style="margin-top:32px">One example fill — Monday</h2>
+      <p class="lead">Just <b>one</b> way to fill the slots. The <span style="color:var(--green);font-weight:600">green-marked lines</span> are the two choices — chicken, eggs, rajma, chana here are swaps, not fixed parts of the recipe.</p>
+
+      <div class="split">
+        <div class="card">
+          <h3 class="green">Lunch box · post-workout</h3>
+          <ul class="clean">
+            <li>Salad greens (lettuce) <span class="amt">2 handfuls / 60g</span></li>
+            <li>Tomato <span class="amt">1 medium</span></li>
+            <li>Onion <span class="amt">¼ medium</span></li>
+            <li>Cucumber <span class="amt">½ diced</span></li>
+            <li class="chosen"><b>Rajma</b>, boiled <span class="pin">slot 3</span> <span class="amt">¾ cup / 130g</span></li>
+            <li class="chosen"><b>Air-fryer chicken</b>, cold-sliced <span class="pin">slot 4</span> <span class="amt">150g</span></li>
+            <li>Pumpkin seeds + hemp <span class="amt">1 tbsp ea</span></li>
+            <li>Nutritional yeast <span class="amt">1 tbsp</span></li>
+            <li>Avocado <span class="amt">¼ · in season</span></li>
+            <li>Dressing — <b>separate cup</b> <span class="amt">1.5 tbsp</span></li>
+          </ul>
+          <div class="macros">
+            <span class="chip"><b>~60g</b> protein</span>
+            <span class="chip"><b>~600</b> kcal</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="green">Dinner box · same format</h3>
+          <ul class="clean">
+            <li>Salad greens <span class="amt">2 handfuls / 60g</span></li>
+            <li>Tomato <span class="amt">1 medium</span></li>
+            <li>Onion <span class="amt">¼ medium</span></li>
+            <li>Cucumber <span class="amt">½ diced</span></li>
+            <li class="chosen"><b>Chana</b>, boiled <span class="pin">slot 3</span> <span class="amt">¾ cup / 130g</span></li>
+            <li class="chosen"><b>Boiled eggs</b> <span class="pin">slot 4</span> <span class="amt">3–4 whole</span></li>
+            <li>Pumpkin seeds + hemp <span class="amt">1 tbsp ea</span></li>
+            <li>Nutritional yeast <span class="amt">1 tbsp</span></li>
+            <li>Dressing — <b>separate cup</b> <span class="amt">1.5 tbsp</span></li>
+          </ul>
+          <div class="macros">
+            <span class="chip"><b>~40–48g</b> protein</span>
+            <span class="chip"><b>~480–560</b> kcal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note g">
+        <span class="ic">∑</span>
+        <span>Two boxes alone: <b>~100–108g protein</b>. Breakfast eggs + protein scoop (~50g) and the chia jar (~25g) clear the 160g floor — the scoop is what finally closes the old ~40g gap. Keep powder in <b>breakfast / chia jar only</b>, not the boxes; they already carry protein from legume + animal source.</span>
+      </div>
+    </section>
+
+    <!-- ============ THE WEEK ============ -->
+    <section class="panel" id="week">
+      <h2>The 7-day roster</h2>
+      <p class="lead">Fish is home-only, cooked fresh and eaten hot — it never goes in a cold box. Boxes run on chicken, tofu, and eggs.</p>
+
+      <div class="card" style="padding:6px 10px">
+        <table class="tbl">
+          <thead><tr><th>Day</th><th>Lunch box</th><th>Dinner</th></tr></thead>
+          <tbody>
+            <tr><td class="day">Mon</td><td>Chicken + rajma</td><td>Eggs + chana</td></tr>
+            <tr><td class="day">Tue</td><td>Chicken + rajma</td><td class="fish">Fish + veg · home</td></tr>
+            <tr><td class="day">Wed</td><td>Chicken + chana</td><td>Tofu + dal + chana</td></tr>
+            <tr><td class="day">Thu</td><td>Eggs + chana</td><td class="fish">Fish + veg · home</td></tr>
+            <tr><td class="day">Fri</td><td>Chicken + sprouts</td><td>Tofu + dal + sprouts</td></tr>
+            <tr><td class="day">Sat</td><td>Chicken + sprouts</td><td class="fish">Fish + veg · home</td></tr>
+            <tr><td class="day">Sun</td><td>Eggs + leftover legume</td><td>Tofu + dal</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="ic">↻</span>
+        <span>This is a <b>starting rotation, not a rule</b>. The real system is the fallback chain — cook fish when you're home and have 10 minutes; otherwise pull batch chicken; if both are out, tofu or eggs assemble in the time it takes to build the box.</span>
+      </div>
+      <div class="note g">
+        <span class="ic">⌂</span>
+        <span>Home dinners (fish) land <b>Tue · Thu · Sat</b>. The other nights are grab-and-go boxes that carry their own protein, so a missed home dinner never leaves you short.</span>
+      </div>
+    </section>
+
+    <!-- ============ PROTEINS ============ -->
+    <section class="panel" id="protein">
+      <h2>Protein: backbone &amp; fallbacks</h2>
+      <p class="lead">One reliable batch protein holds the whole week up. Everything else flexes off it.</p>
+
+      <div class="card">
+        <h3>The hierarchy</h3>
+        <ul class="clean">
+          <li><b>Chicken — the backbone.</b> Batch-cooked, fridge + freezer. Fills boxes on demand.</li>
+          <li><b>Fish — the fresh bonus.</b> Home only, cooked hot, eaten same night. Never batched, never cold.</li>
+          <li><b>Tofu + eggs — the instant backup.</b> Keep raw in the fridge for days; cube or boil in the time it takes to assemble a box. Your zero-prep safety net when the week goes sideways.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Batch chicken — raw fillets, marinate yourself</h3>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:12px">Skip store pre-marinated — refined oils, sugar, excess sodium. Marinate raw in 2 minutes: lemon juice · garlic · ginger · black pepper · paprika or cumin · a little salt · optional splash EVOO. 15 min to overnight.</p>
+        <ol class="steps">
+          <li><b>Marinate</b> raw fillets, 15 min → overnight, in the fridge.</li>
+          <li><b>Air-fry</b> ~180°C / 360°F, 18–20 min, flip once. Cook through (74°C / 165°F, no pink) but don't overshoot — dries out cold.</li>
+          <li><b>Cool completely</b>, spread out not piled, refrigerate within 1 hour. Trapped steam = next-day sliminess.</li>
+          <li><b>Portion ~150g.</b> Slice the fridge batch now for grab-and-drop; freeze the rest <b>whole</b> (holds quality better).</li>
+          <li><b>Split it:</b> 3–4 portions in the fridge (airtight, coldest shelf) — use within <b>3–4 days</b>. Freeze the remainder the <b>same day</b>, wrapped tight, air pressed out.</li>
+          <li><b>Thaw</b> a frozen portion in the fridge overnight before you need it. Never on the counter.</li>
+          <li><b>Use cold</b>, straight into the box's wet layer. No reheat — cold air-fried chicken in a dressed salad is genuinely good.</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <span class="ic">!</span>
+        <span>Cooked chicken keeps only <b>3–4 days</b> refrigerated. A batch of 6–8 stretches past that — so the back half <b>must be frozen the day you cook</b>, not left to age in the fridge first. Smell/texture check anything past day 3; sour note or slime = bin it.</span>
+      </div>
+    </section>
+
+    <!-- ============ LEGUMES ============ -->
+    <section class="panel" id="legume">
+      <h2>Legume rotation</h2>
+      <p class="lead">Boil two days at a time, rotate through the week, no salt while storing — dressing carries the seasoning at the end.</p>
+
+      <div class="card" style="padding:6px 10px">
+        <table class="tbl">
+          <thead><tr><th>Days</th><th>Legume</th><th>Prep</th></tr></thead>
+          <tbody>
+            <tr><td class="day">1–2</td><td>Rajma</td><td>Boil in bulk, store unsalted</td></tr>
+            <tr><td class="day">3–4</td><td>Chana</td><td>Boil in bulk, store unsalted</td></tr>
+            <tr><td class="day">5–6</td><td>Sprouts</td><td>Bought ready — no cooking</td></tr>
+            <tr><td class="day">7</td><td>Leftovers</td><td>Whatever of the three remains</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note g">
+        <span class="ic">✓</span>
+        <span><b>No salt in storage</b> — salt pulls water out and softens both the legumes and (later) the veg. All seasoning arrives with the dressing at eating time. Sprouts need zero prep, so days 5–6 are your easiest builds.</span>
+      </div>
+    </section>
+
+    <!-- ============ BOOSTERS ============ -->
+    <section class="panel" id="boost">
+      <h2>Boosters</h2>
+      <p class="lead">Optional add-ins for flavor and micronutrients — <b>deliberately kept off the six-slot skeleton</b> so the core stays memorable. Season the system with these; don't let them displace a protein slot.</p>
+
+      <div class="card">
+        <h3 class="green">Shiitake mushrooms — the headline booster</h3>
+        <ul class="clean">
+          <li><b>Umami without dairy.</b> Loaded with glutamate — the savory depth cheese would give. With nutritional yeast, they make a dairy-free salad taste finished, not like diet food. This adherence value is the real win.</li>
+          <li><b>Low calorie, high volume.</b> Lots of chew and satiety for almost no calories — ideal on a cut.</li>
+          <li><b>Micronutrients:</b> B-vitamins, copper, selenium, and beta-glucan fibre (immune + cholesterol benefits).</li>
+          <li><b>Vitamin D</b> — one of the few plant sources, and it jumps in sun-dried or UV-treated dried shiitake. A genuine edge.</li>
+        </ul>
+        <div class="note" style="margin-top:14px">
+          <span class="ic">!</span>
+          <span><b>Always cooked, never raw.</b> Raw shiitake can trigger a skin reaction (shiitake dermatitis), and cooking is also what unlocks the nutrients. So they can't go into a cold box raw the way tomato or cucumber does — they're not ~2g of protein either, so they never replace a protein.</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>How to use them in the system</h3>
+        <ul class="clean">
+          <li><b>Hot home dinners (fish/chicken):</b> sauté or air-fry alongside — the natural fit, cooking's already happening.</li>
+          <li><b>Cold boxes:</b> air-fry a batch with a little EVOO, garlic, pepper till golden and chewy; cool; add as a <b>topping</b> (treat like the seeds/nooch layer, not a base veg). Keeps 3–4 days, so batch them alongside your chicken.</li>
+          <li><b>Pantry tip:</b> dried shiitake are cheaper, keep forever, and rehydrate to an even deeper umami. Keep a bag standing.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 class="green">Other boosters worth keeping</h3>
+        <div class="picker" style="margin-top:2px">
+          <div class="pk-label">Cold-box safe · go in raw</div>
+          <div class="opts">
+            <span class="opt">Fresh herbs <small>coriander · mint · parsley</small></span>
+            <span class="opt">Lemon / lime zest</span>
+            <span class="opt">Chili / jalapeño</span>
+            <span class="opt">Olives · capers</span>
+            <span class="opt">Jarred roasted peppers</span>
+            <span class="opt">Grated raw carrot</span>
+            <span class="opt">Toasted sesame</span>
+            <span class="opt">Baby corn</span>
+            <span class="opt">Sun-dried tomatoes <small>dry or EVOO-packed</small></span>
+            <span class="opt">Kimchi <small>fermented, umami + heat</small></span>
+            <span class="opt">Avocado <small>in season</small></span>
+          </div>
+        </div>
+        <div class="picker">
+          <div class="pk-label">Cook first · then cool &amp; add as topping</div>
+          <div class="opts">
+            <span class="opt home">Shiitake &amp; other mushrooms</span>
+            <span class="opt home">Roasted garlic</span>
+            <span class="opt home">Caramelized onion</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note g">
+        <span class="ic">✓</span>
+        <span>Rule of thumb: boosters add <b>flavor, volume, or micronutrients</b> — never the day's protein anchor. If it's low-protein and mainly there for taste, it's a booster and it stays out of the six slots.</span>
+      </div>
+    </section>
+
+    <!-- ============ PACKING ============ -->
+    <section class="panel" id="pack">
+      <h2>Packing for freshness</h2>
+      <p class="lead">Minimum containers: one main box + one tiny dressing cup. The enemies are moisture and pre-dressing.</p>
+
+      <div class="card">
+        <h3>Layer the box, bottom to top</h3>
+        <ul class="clean">
+          <li><b>Bottom — wet &amp; heavy:</b> protein, legume, cucumber, onion. This is the moisture zone by design.</li>
+          <li><b>Tomato — its own corner</b> or a paper-towel nest. It weeps most; never pre-salt it.</li>
+          <li><b>Top — greens, loose.</b> They sit above the moisture, not in it, so they stay crisp.</li>
+          <li><b>Under the lid — a folded paper towel</b> to catch condensation. Single biggest thing keeping lettuce crisp overnight.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 class="green">Protein into the box</h3>
+        <ul class="clean">
+          <li><b>Cold protein, cold box.</b> Never pack even slightly warm — residual heat steams the greens and speeds spoilage.</li>
+          <li><b>Slice cold</b>, straight from the fridge, right before assembly. Slicing warm dries it out.</li>
+          <li><b>Don't pre-dress.</b> A dressed slice sitting overnight goes mushy; acid starts "cooking" fish.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 class="green">Added only at eating time</h3>
+        <ul class="clean">
+          <li>Dressing (its cup)</li>
+          <li>Pumpkin seeds + hemp — can ride dry in one tiny pouch, or keep a desk stash</li>
+          <li>Nutritional yeast</li>
+          <li>Avocado, in season</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <span class="ic">◱</span>
+        <span>Want true single-container? A <b>divided bento with a sealed dressing well</b> handles dressing + tomato separation without a second cup. Sprinkling seeds/nooch dry at your desk drops you to effectively one box.</span>
+      </div>
+    </section>
+
+    <!-- ============ DRESSINGS ============ -->
+    <section class="panel" id="dress">
+      <h2>Six dressings</h2>
+      <p class="lead">All dairy-free, EVOO / mustard-oil / tahini based, no refined oil. Make a jar, add <b>1.5 tbsp at eating time</b> — never the night before.</p>
+
+      <div class="card">
+        <div class="recipe">
+          <div class="rhead"><span class="rnum">1</span><span class="rname">Lemon–Dijon vinaigrette</span><span class="rtag">the everyday one · <span class="ratio">3 : 1</span></span></div>
+          <div class="ing"><span>6 tbsp EVOO</span> · <span>2 tbsp lemon juice</span> · <span>1 tsp dijon</span> · <span>1 grated garlic clove</span> · salt + pepper</div>
+          <div class="meta">Dijon emulsifies so it separates slower. <b>Keeps 1–2 wks.</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="recipe">
+          <div class="rhead"><span class="rnum">2</span><span class="rname">Balsamic vinaigrette</span><span class="rtag">deeper, slightly sweet</span></div>
+          <div class="ing"><span>6 tbsp EVOO</span> · <span>2 tbsp balsamic</span> · <span>1 tsp dijon</span> · <span>½ tsp honey</span> · salt + pepper</div>
+          <div class="meta">Good on chicken boxes. <b>Keeps 1–2 wks.</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="recipe">
+          <div class="rhead"><span class="rnum">3</span><span class="rname">Apple cider vinaigrette</span><span class="rtag">brightest, cut-friendly</span></div>
+          <div class="ing"><span>6 tbsp EVOO</span> · <span>2 tbsp ACV</span> · <span>1 tsp dijon</span> · <span>1 tsp honey</span> · salt + pepper</div>
+          <div class="meta">Lightest-tasting acid — pairs well with sprouts days. <b>Keeps 1–2 wks.</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="recipe">
+          <div class="rhead"><span class="rnum">4</span><span class="rname">Tahini–lemon</span><span class="rtag">creamy, dairy-free</span></div>
+          <div class="ing"><span>3 tbsp tahini</span> · <span>2 tbsp lemon juice</span> · <span>4–6 tbsp water</span> (gradual) · <span>1 grated garlic clove</span> · salt</div>
+          <div class="meta">Seizes pale then loosens as water goes in. +1 tbsp nooch = Caesar-ish (skip the box's nooch that day). <b>Keeps 4–5 days.</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="recipe">
+          <div class="rhead"><span class="rnum">5</span><span class="rname">Mustard oil–lemon</span><span class="rtag">sharp, Indian edge · <span class="ratio">2 : 1</span></span></div>
+          <div class="ing"><span>4 tbsp cold-pressed mustard oil</span> · <span>2 tbsp lemon juice</span> · <span>1 grated garlic clove</span> · <span>¼ tsp black salt</span> + salt · pepper · pinch roasted cumin</div>
+          <div class="meta">More acid than EVOO dressings — mustard oil is potent. Best on sprouts &amp; chana. To tame the raw bite: warm oil to smoking point, <b>cool fully</b>, then mix. <b>Keeps 1–2 wks.</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="recipe">
+          <div class="rhead"><span class="rnum">6</span><span class="rname">Peanut dressing</span><span class="rtag">occasional · ~1×/week</span></div>
+          <div class="ing"><span>2 tbsp natural peanut butter</span> · <span>1 tbsp lime</span> · <span>1 tbsp low-sodium soy/tamari</span> · <span>1 garlic</span> · <span>1 tsp ginger</span> · chili opt · <span>4–6 tbsp warm water</span></div>
+          <div class="meta">Whisk PB with acid + soy first, then stream warm water. <b>Calorie-dense</b> — use 1 tbsp not 1.5, and skip the seeds/hemp that box. <b>Keeps 4–5 days.</b></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <span class="ic">✎</span>
+        <span>Vinaigrettes: EVOO solidifies cold — pull the jar out 10 min early and shake. Tahini &amp; peanut thicken hard — loosen with a splash of warm water before use.</span>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>Box System · cutting-phase reference · built to be opened at 7am with one hand</footer>
+</div>
+
+<script>
+  const tabs=document.querySelectorAll('.tab');
+  const panels=document.querySelectorAll('.panel');
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.p).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+</script>
+</body>
+</html>
