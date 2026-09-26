@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Expense &amp; Claim Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1013; --panel:#161a20; --panel-2:#1d222b; --line:#2a313c;
+    --ink:#e8eaed; --muted:#9aa4b2; --dim:#6b7482;
+    --accent:#5b7a99; --accent-soft:#2f4155;
+    --flag:#c86b6b; --ok:#6f9e7a; --warn:#c89a5b;
+    --paper:#ffffff; --paper-ink:#14181d; --paper-line:#d0d5dd; --paper-muted:#5b6470;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px; margin:0 auto; padding:22px 18px 80px}
+
+  header.app-chrome{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px}
+  .brand h1{font-size:16px; letter-spacing:.02em; margin:0; font-weight:600}
+  .brand .sub{font-size:12px; color:var(--dim); font-family:var(--mono)}
+  .patient{display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:7px 10px}
+  .patient label{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em}
+  .patient input{background:transparent; border:none; color:var(--ink); font-family:var(--mono); font-size:14px; width:170px; outline:none}
+
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px}
+  button{font-family:var(--sans); font-size:13px; cursor:pointer; border-radius:7px; border:1px solid var(--line); background:var(--panel); color:var(--ink); padding:8px 13px; transition:.12s; display:inline-flex; align-items:center; gap:7px}
+  button:hover{background:var(--panel-2); border-color:var(--accent-soft)}
+  button.primary{background:var(--accent-soft); border-color:var(--accent); color:#eaf1f8}
+  button.primary:hover{background:var(--accent)}
+  button.ghost{background:transparent}
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--warn); display:none}
+  .dot.on{display:inline-block}
+
+  /* summary cards */
+  .summary{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:12px 13px}
+  .card .lab{font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin-bottom:6px; line-height:1.3; min-height:26px}
+  .card .val{font-family:var(--mono); font-size:17px; font-weight:600; letter-spacing:-.01em}
+  .card .csub{font-family:var(--mono); font-size:11px; color:var(--dim); margin-top:3px}
+  .card.net{border-color:var(--accent-soft)}
+  .card.net .val{color:#cfe0f0}
+  .card.cost{border-color:#4a4436}
+  .card.cost .val{color:#e6cf95}
+  .card.ins{border-color:#2f5a3e}
+  .card.ins .val{color:var(--ok)}
+  .card.ins .csub{color:#7fae8a}
+  .card.recovered .val{color:var(--ok)}
+  .card.await .val{color:var(--warn)}
+  .card.toclaim .val{color:#d9b06a}
+
+  .filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px}
+  .chip{font-size:12px; padding:5px 11px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--muted); cursor:pointer}
+  .chip:hover{color:var(--ink)}
+  .chip.active{background:var(--accent-soft); border-color:var(--accent); color:#eaf1f8}
+
+  .sheet{background:var(--paper); color:var(--paper-ink); border-radius:6px; padding:22px 22px; box-shadow:0 4px 24px rgba(0,0,0,.4); margin-bottom:20px; overflow-x:auto}
+  .sheet-head{display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--paper-ink); padding-bottom:10px; margin-bottom:4px}
+  .sheet-head .st{font-size:18px; font-weight:700; margin:0}
+  .sheet-head .pt{font-size:12px; color:var(--paper-muted); margin-top:3px; font-family:var(--mono)}
+  .sheet-head .meta{text-align:right; font-size:11px; color:var(--paper-muted); font-family:var(--mono); line-height:1.7}
+
+  /* print summary strip (hidden on screen, shown in print) */
+  .print-summary{display:none}
+
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-family:var(--mono); font-size:12px}
+  thead th{text-align:right; padding:6px 7px; border-bottom:1.5px solid var(--paper-ink); font-weight:700; white-space:nowrap; vertical-align:bottom}
+  thead th.l{text-align:left}
+  tbody td{padding:5px 7px; border-bottom:1px solid var(--paper-line); text-align:right; white-space:nowrap; vertical-align:top}
+  tbody td.l{text-align:left; white-space:normal}
+  tbody tr:hover{background:#f4f6f8}
+  td.date{font-weight:500}
+  .pill{display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; font-family:var(--sans); font-weight:600; white-space:nowrap}
+  .s-toclaim{background:#fff2d9; color:#8a5a12}
+  .s-submitted{background:#e5eef6; color:#2f597e}
+  .s-settled{background:#e2f0e6; color:#2f6d43}
+  .s-rejected{background:#fbe6e6; color:#9a3b3b}
+  .s-nonclaim{background:#ececf0; color:#555}
+  .s-cashless{background:#eae6f5; color:#5a4a86}
+  .s-reference{background:#e7ebf1; color:#5b6470; font-style:italic}
+  td.desc{font-family:var(--sans)}
+  td.notes{font-family:var(--sans); font-size:11px; color:var(--paper-muted); white-space:normal}
+  tfoot td{padding:8px 7px; border-top:2px solid var(--paper-ink); font-weight:700; font-family:var(--mono)}
+  tfoot td.l{text-align:left}
+  .row-actions{opacity:0; display:inline-flex; gap:6px; font-family:var(--sans); margin-left:6px}
+  tbody tr:hover .row-actions{opacity:1}
+  .row-actions span{cursor:pointer; font-size:11px; color:var(--paper-muted); text-decoration:underline}
+  .row-actions span:hover{color:var(--paper-ink)}
+  .empty-note{text-align:center; color:var(--paper-muted); padding:22px; font-family:var(--sans); font-size:13px}
+  .sheet-foot{margin-top:14px; padding-top:9px; border-top:1px solid var(--paper-line); font-size:10px; color:var(--paper-muted)}
+  tr.hide{display:none}
+
+  .entry{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:14px}
+  .entry h3{margin:0 0 12px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:600}
+  .fields{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+  .field{display:flex; flex-direction:column; gap:4px}
+  .field label{font-size:11px; color:var(--dim); font-family:var(--mono)}
+  .field input,.field select{background:var(--panel-2); border:1px solid var(--line); border-radius:6px; color:var(--ink); padding:8px 9px; font-family:var(--mono); font-size:13px; outline:none}
+  .field input:focus,.field select:focus{border-color:var(--accent)}
+  .field.wide{grid-column:1 / span 2}
+  .entry-actions{margin-top:12px; display:flex; gap:8px}
+
+  .hint{font-size:12px; color:var(--dim); margin:10px 2px; line-height:1.6}
+  .refkey{background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:12px 14px; margin-bottom:16px}
+  .rk-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+  .rk-badge{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:#cfe0f0; background:var(--accent-soft); border:1px solid var(--accent); padding:3px 8px; border-radius:5px; font-weight:600}
+  .rk-fmt{font-size:12.5px; color:var(--muted); font-family:var(--mono)}
+  .rk-fmt b{color:var(--ink)} .rk-dim{color:var(--dim)}
+  .rk-codes{display:grid; grid-template-columns:repeat(3,1fr); gap:7px 16px}
+  .rk-item{font-size:12px; color:var(--muted)}
+  .rk-item b{display:inline-block; min-width:30px; color:#d9b06a; font-family:var(--mono); font-weight:700}
+  .rk-item .rk-desc{color:var(--dim); font-size:11px}
+  .rk-print{display:none}
+  .nextref{background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:12px 14px; margin-bottom:16px}
+  .nr-row{display:flex; align-items:center; gap:12px; padding:4px 0}
+  .nr-row+.nr-row{border-top:1px dashed var(--line)}
+  .nr-year{font-family:var(--mono); font-size:13px; font-weight:700; color:var(--ink); min-width:26px}
+  .nr-cells{display:flex; gap:8px; flex-wrap:wrap}
+  .nr-cell{font-family:var(--mono); font-size:12.5px; color:var(--muted); background:var(--panel-2); border:1px solid var(--line); border-radius:6px; padding:3px 9px}
+  .nr-code{color:#d9b06a; font-weight:700}
+  .rk-badge.alt{background:#3a3320; border-color:#8a6d2f; color:#e6cf95}
+  @media (max-width:760px){ .rk-codes{grid-template-columns:repeat(2,1fr)} }
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--panel-2); border:1px solid var(--accent); color:var(--ink); padding:10px 16px; border-radius:8px; font-size:13px; opacity:0; transition:.2s; pointer-events:none; z-index:50; max-width:90vw; text-align:center}
+  .toast.show{opacity:1}
+  input[type=file]{display:none}
+
+  @media (max-width:900px){ .summary{grid-template-columns:repeat(2,1fr)} .field.wide{grid-column:auto} }
+  .fhint{color:var(--dim); font-weight:400; font-size:10px}
+
+  @media print{
+    @page{ size:A4 landscape; margin:11mm; }
+    body{background:#fff}
+    .app-chrome,.toolbar,.filters,.entry,.hint,.toast,.row-actions,.summary,.refkey,.nextref,.viewtabs,.claimbar,.claimnums,.chk-dismiss,.chk-restore{display:none !important}
+    .rk-print{display:block; font-family:var(--mono); font-size:9.5px; color:#333; margin:8px 0 2px}
+    .wrap{max-width:none; padding:0}
+    .sheet{box-shadow:none; border-radius:0; padding:0; margin:0; color:#000; overflow:visible}
+    tr.hide{display:table-row !important}
+    tbody tr:hover{background:none}
+    table{font-size:10px}
+    thead th{padding:5px 5px}
+    tbody td{padding:4px 5px}
+    .blank-row{display:table-row !important}
+    .print-summary{display:flex; gap:14px; margin:10px 0 4px; flex-wrap:wrap}
+    .print-summary .pc{border:1px solid #000; border-radius:5px; padding:6px 10px; font-family:var(--mono); font-size:11px}
+    .print-summary .pc b{display:block; font-size:9px; font-weight:400; color:#444; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px}
+  }
+  .blank-row{display:none}
+
+  /* view tabs */
+  .viewtabs{display:flex; gap:4px; margin-bottom:14px; border-bottom:1px solid var(--line)}
+  .vtab{font-size:13px; padding:9px 15px; border:none; border-bottom:2px solid transparent; background:transparent; color:var(--muted); border-radius:0; cursor:pointer}
+  .vtab:hover{background:transparent; color:var(--ink); border-color:transparent}
+  .vtab.active{color:#eaf1f8; border-bottom-color:var(--accent)}
+  .vtab .vb{display:inline-block; margin-left:6px; font-family:var(--mono); font-size:10.5px; min-width:16px; padding:1px 5px; border-radius:9px; background:var(--panel-2); color:var(--muted)}
+  .vtab .vb.alert{background:#4a2f2f; color:#e6a4a4}
+  .vtab .vb.clear{background:#26402f; color:#8fc39f}
+
+  /* linked-RX tag on a ledger row */
+  .lnk{display:inline-block; font-family:var(--mono); font-size:10px; padding:1px 6px; border-radius:4px; background:#eef2f6; color:#3f6187; border:1px solid #d5e0ea; margin-right:6px; white-space:nowrap}
+  .lnk.bad{background:#fbe6e6; color:#9a3b3b; border-color:#eecccc}
+  .lnk.clm{background:#eef7ee; color:#2f6d43; border-color:#cfe6d3}
+  .clmtag{display:inline-block; font-family:var(--mono); font-size:9.5px; padding:0 5px; border-radius:4px; background:#eef7ee; color:#2f6d43; margin-left:6px}
+  .lnk.ph{background:#eef0fb; color:#4a4a86; border-color:#d5d8ee}
+  .lnk.clm2{font-weight:600}
+  .rx-claim{font-family:var(--mono); font-size:10.5px; color:#2f6d43; background:#eef7ee; padding:2px 8px; border-radius:20px; margin-right:8px}
+
+  /* claim map */
+  .rx-block{border:1px solid var(--paper-line); border-radius:7px; margin:12px 0; overflow:hidden}
+  .rx-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; background:#f4f6f8; padding:9px 12px; border-bottom:1px solid var(--paper-line); flex-wrap:wrap}
+  .rx-top .rx-id{font-family:var(--mono); font-size:12px; font-weight:700; color:#8a5a12}
+  .rx-top .rx-desc{font-family:var(--sans); font-size:12.5px; color:var(--paper-ink); font-weight:600}
+  .rx-top .rx-date{font-family:var(--mono); font-size:11px; color:var(--paper-muted)}
+  .rx-tally{font-family:var(--sans); font-size:10.5px}
+  .rx-flag{display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; font-family:var(--sans)}
+  .rf-open{background:#fff2d9; color:#8a5a12} .rf-done{background:#e2f0e6; color:#2f6d43} .rf-empty{background:#fbe6e6; color:#9a3b3b}
+  .rx-children{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11.5px}
+  .rx-children td{padding:5px 12px; border-bottom:1px solid #eef1f4; text-align:right; white-space:nowrap}
+  .rx-children td.l{text-align:left; white-space:normal; font-family:var(--sans)}
+  .rx-children .code{font-family:var(--mono); color:#8a5a12; font-weight:600}
+  .rx-children tr:last-child td{border-bottom:none}
+  .rx-sub{padding:7px 12px; background:#fafbfc; font-family:var(--mono); font-size:11px; color:var(--paper-muted); text-align:right; border-top:1px solid var(--paper-line)}
+  .rx-none{padding:9px 12px; font-family:var(--sans); font-size:11.5px; color:var(--paper-muted)}
+  .map-section-h{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--paper-ink); margin:20px 0 4px}
+  .unlinked-warn{border:1px solid #e6b7b7; background:#fdf2f2; border-radius:7px; padding:4px 0; margin-top:6px}
+  .unlinked-warn .uh{padding:8px 12px; font-family:var(--sans); font-size:11.5px; color:#9a3b3b; font-weight:600}
+
+  /* checks */
+  .chk-group{margin:14px 0}
+  .chk-h{display:flex; align-items:center; gap:8px; font-family:var(--sans); font-size:12.5px; font-weight:700; color:var(--paper-ink); margin-bottom:6px}
+  .chk-sev{font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:4px}
+  .sev-high{background:#fbe6e6; color:#9a3b3b} .sev-med{background:#fff2d9; color:#8a5a12} .sev-rev{background:#e5eef6; color:#2f597e}
+  .chk-item{font-family:var(--mono); font-size:11.5px; color:var(--paper-ink); padding:4px 0 4px 14px; border-left:2px solid var(--paper-line); margin-left:2px}
+  .chk-item .ci-ref{color:#8a5a12; font-weight:600}
+  .chk-item{position:relative}
+  .chk-dismiss,.chk-restore{font-family:var(--sans); font-size:10px; color:var(--paper-muted); margin-left:8px; cursor:pointer; text-decoration:underline; white-space:nowrap}
+  .chk-dismiss:hover,.chk-restore:hover{color:var(--paper-ink)}
+  .chk-item.chk-off{color:var(--paper-muted); opacity:.75; border-left-color:#e3e6ea}
+  .chk-item.chk-off .ci-ref{color:#b09055}
+  .chk-dnote{font-family:var(--sans); font-size:11px; color:#2f6d43; margin-left:6px}
+  .chk-clear{font-family:var(--sans); font-size:12.5px; color:#2f6d43; padding:8px 0}
+  .recon{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 2px}
+  .recon .rc{font-family:var(--mono); font-size:11.5px; border:1px solid var(--paper-line); border-radius:6px; padding:5px 10px; color:var(--paper-ink)}
+  .recon .rc b{color:#8a5a12}
+  .fp{font-family:var(--mono); font-size:11px; color:var(--paper-muted); margin-top:10px; padding-top:8px; border-top:1px solid var(--paper-line)}
+
+  /* live form hints */
+  .formhints{margin-top:10px; display:flex; flex-direction:column; gap:4px}
+  .fhint-line{font-family:var(--mono); font-size:11px; color:var(--warn)}
+  .fhint-line.ok{color:var(--ok)}
+
+  /* readme */
+  .rm{font-family:var(--sans); color:var(--paper-ink); font-size:13px; line-height:1.6}
+  .rm h2{font-size:14px; margin:18px 0 6px; border-bottom:1px solid var(--paper-line); padding-bottom:4px}
+  .rm h2:first-child{margin-top:6px}
+  .rm p{margin:6px 0}
+  .rm ol,.rm ul{margin:6px 0 6px 20px; padding:0}
+  .rm li{margin:4px 0}
+  .rm code{font-family:var(--mono); background:#f0f2f5; padding:1px 5px; border-radius:4px; font-size:12px; color:#8a5a12}
+  .rm table.rm-codes{width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0}
+  .rm table.rm-codes th{text-align:left; border-bottom:1.5px solid var(--paper-ink); padding:5px 8px}
+  .rm table.rm-codes td{border-bottom:1px solid var(--paper-line); padding:5px 8px; vertical-align:top}
+  .rm table.rm-codes td.c{font-family:var(--mono); color:#8a5a12; font-weight:700}
+  .rm .ex{border:1px solid var(--paper-line); border-radius:7px; padding:10px 12px; margin:8px 0; background:#fafbfc; font-size:12.5px}
+  .rm .ex b{color:#8a5a12}
+  .rm .why li{margin:6px 0}
+
+  /* Section F insurer form */
+  .sf-title{background:#ececec; color:#111; font-weight:700; font-size:14px; padding:10px 12px; border:1px solid #cfcfcf; border-bottom:none; margin-top:6px}
+  table.sectionf{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:12.5px; color:var(--paper-ink)}
+  table.sectionf th, table.sectionf td{border:1px solid #cfcfcf; padding:8px 10px}
+  table.sectionf th{background:#fff; font-weight:600; text-align:center}
+  table.sectionf td.sf-sno{text-align:left; width:52px}
+  table.sectionf td.sf-date{white-space:nowrap}
+  table.sectionf td.sf-amt{text-align:right; font-family:var(--mono); white-space:nowrap; width:130px}
+  table.sectionf td.sf-empty-date{color:#bbb}
+  table.sectionf tr.sf-total td{font-weight:700; background:#fafafa}
+  table.sectionf tr.sf-sec td{background:#f2f2f2; font-weight:700; font-size:12px}
+  table.sectionf tr.sf-sec.sf-warn td{background:#fdecec; color:#9a3b3b}
+  table.sectionf tr.sf-sub td{font-weight:600; background:#fafbfc}
+  table.sectionf td.sf-none{color:#bbb; text-align:center}
+  table.sectionf tr.sf-cash td{background:#f6f4fb}
+  .sf-cash-tag{display:inline-block; font-size:9.5px; font-weight:600; color:#5a4a86; background:#eae6f5; padding:1px 6px; border-radius:4px; margin-left:6px}
+  .sf-cash-sub{font-size:9px; color:var(--paper-muted); font-weight:400}
+  .sf-note{font-size:11px; color:var(--paper-muted); margin-top:10px; line-height:1.5}
+  .claimbar{font-family:var(--sans); font-size:12px; color:var(--paper-muted); margin:2px 0 12px}
+  .claimbar select{font-family:var(--sans); font-size:12px; padding:3px 6px; border:1px solid var(--paper-line); border-radius:5px; background:#fff; color:var(--paper-ink)}
+  .claimnums{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:2px 0 14px; padding:8px 10px; background:#fafbfc; border:1px solid var(--paper-line); border-radius:7px}
+  .claimnums .cn-lbl{font-family:var(--sans); font-size:11.5px; color:var(--paper-muted)}
+  .claimnums .cn-item{display:inline-flex; align-items:center; gap:5px}
+  .claimnums .cn-input{font-family:var(--mono); font-size:12px; padding:3px 7px; border:1px solid var(--paper-line); border-radius:5px; width:150px; color:var(--paper-ink)}
+
+  /* dashboard */
+  .dm-summary{display:flex; gap:10px; margin:4px 0 16px}
+  .dm-pill{font-family:var(--sans); font-size:12px; font-weight:600; padding:5px 12px; border-radius:20px}
+  .dm-block{margin:16px 0}
+  .dm-head{display:flex; align-items:baseline; gap:10px; margin-bottom:6px}
+  .dm-head .dm-name{font-family:var(--sans); font-size:13px; font-weight:600; color:var(--paper-ink)}
+  .dm-head .dm-total{font-family:var(--mono); font-size:11.5px; color:var(--paper-muted); margin-left:auto}
+  table.dashtable{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:12.5px}
+  table.dashtable th,table.dashtable td{border-bottom:1px solid var(--paper-line); padding:7px 10px; text-align:right; white-space:nowrap}
+  table.dashtable th.l,table.dashtable td.l{text-align:left}
+  table.dashtable th{color:var(--paper-muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em}
+  table.dashtable td.dm-amt{font-family:var(--mono)}
+  .dm-status{font-family:var(--sans); font-size:12px; font-weight:600; padding:3px 8px; border:1px solid var(--paper-line); border-radius:5px}
+  .dm-ref{font-family:var(--mono); font-size:12px; padding:3px 7px; border:1px solid var(--paper-line); border-radius:5px; width:160px}
+  .dm-date{font-family:var(--sans); font-size:12px; padding:2px 6px; border:1px solid var(--paper-line); border-radius:5px}
+  .dm-note{font-family:var(--sans); font-size:12px; padding:3px 7px; border:1px solid var(--paper-line); border-radius:5px; width:160px; color:var(--paper-ink)}
+  .dm-plan{margin:0 0 16px}
+  .dm-plan-lbl{font-family:var(--sans); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--paper-muted); margin-bottom:4px}
+  .dm-plan-box{width:100%; box-sizing:border-box; min-height:64px; resize:vertical; font-family:var(--sans); font-size:12.5px; line-height:1.5; padding:9px 11px; border:1px solid var(--paper-line); border-radius:7px; background:#fffdf7; color:var(--paper-ink)}
+  .dm-cash td{color:var(--paper-muted)}
+  .fs-cash{font-size:11.5px; color:#5a4a86}
+  .fs-pending{background:#fff2d9; color:#8a5a12}
+  .fs-filed{background:#e5eef6; color:#2f597e}
+  .fs-approved{background:#e2f0e6; color:#2f6d43}
+  .fs-settled{background:#d7ecdf; color:#1e7a46}
+  .fs-rejected{background:#fbe6e6; color:#9a3b3b}
+
+  /* filing packet */
+  .pk-body{padding:6px 12px 12px}
+  .pk-stage{margin:10px 0 4px}
+  .pk-stage-head{display:flex; align-items:baseline; gap:10px; border-bottom:1.5px solid var(--paper-ink); padding-bottom:4px; margin-bottom:2px}
+  .pk-stage-name{font-family:var(--sans); font-size:13px; font-weight:700; color:var(--paper-ink)}
+  .pk-meta{font-family:var(--mono); font-size:11px; color:var(--paper-muted)}
+  .pk-badge-wrap{margin-left:auto}
+  .pk-badge{font-family:var(--sans); font-size:10.5px; font-weight:600; padding:2px 9px; border-radius:20px}
+  .pk-sub{font-family:var(--sans); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--paper-muted); margin:8px 0 2px}
+  .pk-sub.pk-none{font-weight:400; text-transform:none; letter-spacing:0; color:#b09055; font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app-chrome">
+    <div class="brand">
+      <h1>Medical Expense &amp; Claim Tracker</h1>
+      <span class="sub" id="genstamp"></span>
+    </div>
+    <div class="patient">
+      <label>Patient</label>
+      <input id="patientName" placeholder="Name" autocomplete="off">
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="primary" onclick="doPrint()">&#9113; Print ledger</button>
+    <button class="ghost" onclick="exportData()">&#8595; Backup (JSON) <span class="dot" id="dot"></span></button>
+    <button class="ghost" onclick="document.getElementById('importFile').click()">&#8593; Restore</button>
+    <input type="file" id="importFile" accept="application/json" onchange="importData(event)">
+    <select id="fyFilter" onchange="render()" class="field" style="background:var(--panel);border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:8px 11px;font-family:var(--sans);font-size:13px"></select>
+  </div>
+
+  <div class="viewtabs" id="viewtabs"></div>
+
+  <div class="refkey" id="refkey">
+    <div class="rk-head"><span class="rk-badge">Ref no. key</span><span class="rk-fmt">Format <b>YY-CODE-SEQ</b> &mdash; e.g. <b>26-M-014</b> <span class="rk-dim">(year &middot; type &middot; running number; one counter per code)</span></span></div>
+    <div class="rk-codes" id="rk-codes"></div>
+  </div>
+
+  <div class="nextref" id="nextref"></div>
+
+  <div class="summary" id="summary"></div>
+  <div class="filters" id="filters"></div>
+
+  <div class="sheet" id="sheet"></div>
+  <div class="sheet" id="readmeview" style="display:none"></div>
+  <div class="sheet" id="dashview" style="display:none"></div>
+  <div class="sheet" id="mapview" style="display:none"></div>
+  <div class="sheet" id="bucketview" style="display:none"></div>
+  <div class="sheet" id="packetview" style="display:none"></div>
+  <div class="sheet" id="sfview" style="display:none"></div>
+  <div class="sheet" id="checkview" style="display:none"></div>
+  <div id="form"></div>
+
+  <p class="hint">
+    Each row carries a <strong>status</strong> and three amounts &mdash; <strong>paid</strong> (your money out), <strong>claimed</strong> (submitted for reimbursement), <strong>recovered</strong> (got back). The cards above total it live.
+    Update an entry&rsquo;s status as a claim moves (To&nbsp;claim &rarr; Submitted &rarr; Settled) &mdash; click <em>edit</em> on the row.
+    Data saves in <strong>this browser on this device</strong>. The Backup dot lights up when you have changes not yet saved to a file &mdash; back up after every session.
+  </p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORE_KEY='medfin:v1';
+// Ref no. codes — [code, short label (dropdown/column), fuller description (key note)]
+const REFKEY=[
+  ['RX','Prescription','Doctor\u2019s advice / prescription \u2014 no charge; the anchor bills & reports link to'],
+  ['RP','Report',      'Test / lab / scan report, discharge summary \u2014 no charge; links to its RX'],
+  ['M', 'Medicines',  'Medicines / pharmacy bills'],
+  ['DX','Diagnostics','Lab tests, PSA, scans, PSMA, biopsy charges'],
+  ['DR','Doctor / OPD','Consultations, OPD visits'],
+  ['C', 'Cashless',   'TPA-settled day-care / hospitalisation'],
+  ['H', 'Hospital',   'Out-of-pocket hospital / procedure bills'],
+  ['O', 'Other',      'Ambulance, devices, consumables'],
+];
+const CATEGORIES=REFKEY.map(([c,short])=>c+' \u2014 '+short);
+const STATUSES=[
+  {k:'toclaim',  label:'To claim',   cls:'s-toclaim'},
+  {k:'submitted',label:'Submitted',  cls:'s-submitted'},
+  {k:'settled',  label:'Settled',    cls:'s-settled'},
+  {k:'rejected', label:'Rejected',   cls:'s-rejected'},
+  {k:'nonclaim', label:'Non-claimable', cls:'s-nonclaim'},
+  {k:'cashless', label:'Cashless (TPA)', cls:'s-cashless'},
+  {k:'reference',label:'Reference',   cls:'s-reference'},
+];
+const statusMap=Object.fromEntries(STATUSES.map(s=>[s.k,s]));
+const PHASES=[
+  ['pre','Pre-Hospitalization','Pre-hosp'],
+  ['hosp','Hospitalization','Hosp'],
+  ['post','Post-Hospitalization','Post-hosp'],
+  ['checkup','Health-Checkup','Checkup']
+];
+const phaseMap=Object.fromEntries(PHASES.map(p=>[p[0],p]));
+const CLAIM_CODES=['M','DX','DR','C','H','O'];       // codes that carry a bill (need a prescription behind them)
+const isRxRow=r=>codeOf(r)==='RX';                   // the anchor: prescriptions other rows link to
+const isRefRow=r=>{ const c=codeOf(r); return c==='RX'||c==='RP'; };  // no-charge rows (prescription or report)
+
+let state={ patient:'', rows:[], editing:null, filter:'all', fy:'all', dirty:0, refManual:false, view:'ledger', claimFilter:'all', dismissed:[], claimNumbers:{}, filings:{}, dashNote:'' };
+
+/* ---- link resolution (store RX id, display RX ref) ---- */
+function rxRows(){ return sortedDesc(state.rows.filter(isRxRow)); }
+function rowById(id){ return state.rows.find(r=>r.id===id)||null; }
+function refOf(id){ const r=rowById(id); return r?(r.ref||'(no ref)'):null; }
+function linkStatus(id){ if(!id) return 'none'; const r=rowById(id); if(!r) return 'dangling'; return isRxRow(r)?'ok':'notrx'; }
+function billRows(){ return sortedDesc(state.rows.filter(r=>!isRefRow(r))); }
+/* walk linkTo up the chain (report \u2192 bill \u2192 RX) until an RX is reached; loop/-depth safe */
+function resolveRX(startId){ let cur=startId, seen=new Set(), n=0;
+  while(cur && !seen.has(cur) && n<12){ seen.add(cur); const r=rowById(cur); if(!r) return null; if(isRxRow(r)) return r.id; cur=r.linkTo; n++; }
+  return null; }
+function chainOk(r){ return !!(r && resolveRX(r.id)); }
+function filingKey(claim,phase){ return (claim||'').trim()+'|||'+(phase||''); }
+function getFiling(claim,phase){ return (state.filings||{})[filingKey(claim,phase)]||{status:'',ref:'',date:''}; }
+function effClaim(r){ if(!r) return ''; if(r.claimNo) return r.claimNo;         // 1. explicit row override
+  const f=getFiling(r.claim, r.phase); if(f.ref) return f.ref;                   // 2. this stage's filing ref (from Dashboard)
+  const rx=rowById(resolveRX(r.id)); return (rx&&rx.claimNo)?rx.claimNo:''; }    // 3. inherited from its RX
+
+/* ---- persistence ---- */
+function load(){ try{ const raw=localStorage.getItem(STORE_KEY); if(raw){ const s=JSON.parse(raw);
+  state.patient=s.patient||''; state.rows=s.rows||[]; state.dirty=s.dirty||0; state.dismissed=s.dismissed||[]; state.claimNumbers=s.claimNumbers||{}; state.filings=s.filings||{}; state.dashNote=s.dashNote||''; } }catch(e){} }
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify({patient:state.patient,rows:state.rows,dirty:state.dirty,dismissed:state.dismissed,claimNumbers:state.claimNumbers,filings:state.filings,dashNote:state.dashNote})); }
+  catch(e){ toast('Could not save to this browser \u2014 use Backup to keep a copy'); } }
+function markDirty(){ state.dirty=(state.dirty||0)+1; }
+
+/* ---- helpers ---- */
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function n(v){ const x=parseFloat(v); return isNaN(x)?0:x; }
+function rupee(v){ return '\u20B9'+ (v||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function fyOf(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); const y=d.getFullYear(), m=d.getMonth(); // Apr(3)-Mar(2)
+  const start = m>=3 ? y : y-1; return 'FY'+start+'-'+String((start+1)%100).padStart(2,'0'); }
+function sortedDesc(arr){ return [...arr].sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:0); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+function visibleRows(){ let r=state.rows;
+  if(state.fy!=='all') r=r.filter(x=>fyOf(x.date)===state.fy);
+  return r; }
+
+/* ---- totals ---- */
+function totals(rows){
+  let paid=0,claimed=0,recovered=0,awaiting=0,toclaim=0,nonclaim=0,cashless=0,cashN=0,inspaid=0,billed=0;
+  rows.forEach(r=>{ const p=n(r.paid),c=n(r.claimed),rec=n(r.recovered),ip=n(r.inspaid),bl=n(r.billed);
+    paid+=p; claimed+=c; recovered+=rec; inspaid+=ip;
+    billed += (bl>0 ? bl : (p+ip));                 // effective net bill: use billed, else derive from paid+insurer
+    if(r.status==='submitted') awaiting += Math.max(c-rec,0);
+    if(r.status==='toclaim') toclaim += p;
+    if(r.status==='nonclaim') nonclaim += p;
+    if(r.status==='cashless'){ cashless+=p; cashN++; }
+  });
+  const insBorne = inspaid + recovered;             // insurer money: direct (cashless) + reimbursed
+  const selfBorne = paid - recovered;               // your net out-of-pocket
+  const coverage = billed>0 ? insBorne/billed : 0;
+  return {paid,claimed,recovered,net:selfBorne,awaiting,toclaim,nonclaim,cashless,cashN,inspaid,billed,insBorne,selfBorne,coverage};
+}
+
+/* ---- render ---- */
+function render(){
+  state.fy=document.getElementById('fyFilter').value||'all';
+  const rows=visibleRows();
+  const t=totals(rows);
+  renderNextRef();
+  // summary cards
+  document.getElementById('summary').innerHTML=[
+    ['Total treatment cost', rupee(t.billed), 'cost', ''],
+    ['Borne by insurance', rupee(t.insBorne), 'ins', t.billed>0?Math.round(t.coverage*100)+'% of cost':''],
+    ['Borne by you<br>(net out-of-pocket)', rupee(t.selfBorne), 'net', ''],
+    ['Total paid<br>(gross out of pocket)', rupee(t.paid), '', ''],
+    ['Recovered', rupee(t.recovered), 'recovered', ''],
+    ['Awaiting recovery<br>(submitted)', rupee(t.awaiting), 'await', ''],
+    ['Still to claim', rupee(t.toclaim), 'toclaim', ''],
+    ['Non-claimable', rupee(t.nonclaim), '', ''],
+  ].map(([l,v,c,sub])=>`<div class="card ${c}"><div class="lab">${l}</div><div class="val">${v}</div>${sub?`<div class="csub">${sub}</div>`:''}</div>`).join('');
+
+  // filters
+  const counts={all:rows.length}; STATUSES.forEach(s=>counts[s.k]=rows.filter(r=>r.status===s.k).length);
+  const chips=[{k:'all',label:'All'}].concat(STATUSES);
+  document.getElementById('filters').innerHTML=chips.map(s=>`<button class="chip ${state.filter===s.k?'active':''}" onclick="setFilter('${s.k}')">${s.label} <span style="opacity:.6">${counts[s.k]||0}</span></button>`).join('');
+
+  // sheet
+  const disp=sortedDesc(rows);
+  let body='';
+  if(disp.length===0){ body=`<tr><td colspan="11" class="empty-note">No entries yet. Add your first bill below.</td></tr>`; }
+  else{ disp.forEach(r=>{ const st=statusMap[r.status]||{label:r.status,cls:'s-nonclaim'};
+    const hidden=(state.filter!=='all'&&r.status!==state.filter)?' hide':'';
+    body+=`<tr class="${hidden}" data-status="${r.status}">
+      <td class="l date">${fmtDate(r.date)}</td>
+      <td class="l desc">${escapeHtml(r.desc||'')}</td>
+      <td class="l" style="font-family:var(--sans);font-size:11px;color:var(--paper-muted)">${escapeHtml(r.cat||'')}</td>
+      <td class="l" style="font-size:11px;white-space:nowrap">${escapeHtml(r.ref||'')}</td>
+      <td>${r.billed?rupee(n(r.billed)):'\u00B7'}</td>
+      <td>${r.inspaid?rupee(n(r.inspaid)):'\u00B7'}</td>
+      <td>${r.paid?rupee(n(r.paid)):'\u00B7'}</td>
+      <td class="l"><span class="pill ${st.cls}">${st.label}</span></td>
+      <td>${r.claimed?rupee(n(r.claimed)):'\u00B7'}</td>
+      <td>${r.recovered?rupee(n(r.recovered)):'\u00B7'}</td>
+      <td class="l notes">${claimTag(r)}${linkTag(r)}${effClaim(r)?`<span class="lnk clm">#${escapeHtml(effClaim(r))}</span>`:''}${r.phase&&phaseMap[r.phase]?`<span class="lnk ph">${phaseMap[r.phase][2]}</span>`:''}${escapeHtml(r.notes||'')}<span class="row-actions"><span onclick="editRow('${r.id}')">edit</span><span onclick="delRow('${r.id}')">delete</span></span></td>
+    </tr>`; }); }
+  let blanks=''; for(let i=0;i<5;i++){ blanks+=`<tr class="blank-row"><td class="l"></td><td class="l"></td><td class="l"></td><td class="l"></td><td></td><td></td><td></td><td class="l"></td><td></td><td></td><td class="l"></td></tr>`; }
+
+  const printSummary=`<div class="print-summary">
+    <div class="pc"><b>Total treatment cost</b>${rupee(t.billed)}</div>
+    <div class="pc"><b>Borne by insurance</b>${rupee(t.insBorne)}${t.billed>0?' ('+Math.round(t.coverage*100)+'%)':''}</div>
+    <div class="pc"><b>Borne by you</b>${rupee(t.selfBorne)}</div>
+    <div class="pc"><b>Recovered</b>${rupee(t.recovered)}</div>
+    <div class="pc"><b>Awaiting recovery</b>${rupee(t.awaiting)}</div>
+    <div class="pc"><b>Still to claim</b>${rupee(t.toclaim)}</div>
+  </div>`;
+
+  const head=`<div class="sheet-head"><div><div class="st">Expense &amp; Claim Ledger${state.fy!=='all'?' \u2014 '+state.fy:''}</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'}</div></div><div class="meta">Generated ${fmtDate(today())}<br>${disp.length} entr${disp.length===1?'y':'ies'}</div></div>`;
+
+  const printKey=`<div class="rk-print">Ref no. key &mdash; Format YY-CODE-SEQ (e.g. 26-M-014). ${REFKEY.map(([c,short])=>c+' '+short).join('  \u00B7  ')}</div>`;
+
+  document.getElementById('sheet').innerHTML = head + printSummary + printKey +
+    `<table><thead><tr>
+      <th class="l">Date</th><th class="l">Description</th><th class="l">Category</th><th class="l">Ref no.</th>
+      <th>Billed</th><th>Insurer paid<br><span style="font-weight:400;font-size:9px;color:var(--paper-muted)">cashless</span></th><th>Paid<br><span style="font-weight:400;font-size:9px;color:var(--paper-muted)">your share</span></th><th class="l">Status</th><th>Claimed</th><th>Recovered</th><th class="l">Notes</th>
+    </tr></thead><tbody>${body}${blanks}</tbody>
+    <tfoot><tr><td class="l" colspan="4">Totals${state.filter!=='all'?' (all statuses)':''}</td><td>${rupee(t.billed)}</td><td>${rupee(t.inspaid)}</td><td>${rupee(t.paid)}</td><td></td><td>${rupee(t.claimed)}</td><td>${rupee(t.recovered)}</td><td></td></tr></tfoot>
+    </table>
+    <div class="sheet-foot">Total treatment cost <strong>${rupee(t.billed)}</strong> = borne by insurance <strong>${rupee(t.insBorne)}</strong>${t.billed>0?' ('+Math.round(t.coverage*100)+'%)':''} + borne by you <strong>${rupee(t.selfBorne)}</strong>. &nbsp;\u00B7&nbsp; Your net figure is the un-reimbursed medical expense for tax; confirm deductibility with your CA.</div>`;
+
+  // --- other views (computed live from the same rows) ---
+  renderMap(rows);
+  renderClaimForm(rows);
+  renderSectionF(rows);
+  renderDashboard(rows);
+  renderPacket(rows);
+  const issues=renderChecks();
+  renderReadme();
+
+  // --- view tabs + visibility ---
+  const v=state.view||'ledger';
+  const tabDefs=[['readme','Readme',null],['dash','Dashboard',null],['ledger','Ledger',null],['map','Claim map',null],['buckets','Buckets',null],['packet','Packet',null],['sectionf','Section F',null],['check','Checks',issues]];
+  document.getElementById('viewtabs').innerHTML=tabDefs.map(([k,label,badge])=>{
+    let b='';
+    if(k==='check'){ const cls=badge>0?'alert':'clear'; b=`<span class="vb ${cls}">${badge>0?badge:'\u2713'}</span>`; }
+    return `<button class="vtab ${v===k?'active':''}" onclick="setView('${k}')">${label}${b}</button>`;
+  }).join('');
+  const show=(id,on)=>{ const el=document.getElementById(id); if(el) el.style.display=on?'':'none'; };
+  show('refkey', v==='ledger'); show('nextref', v==='ledger'); show('summary', v==='ledger'||v==='map');
+  show('filters', v==='ledger'); show('sheet', v==='ledger'); show('form', v==='ledger');
+  show('readmeview', v==='readme'); show('dashview', v==='dash'); show('mapview', v==='map'); show('bucketview', v==='buckets'); show('packetview', v==='packet'); show('sfview', v==='sectionf'); show('checkview', v==='check');
+
+  document.getElementById('patientName').value=state.patient;
+  document.getElementById('genstamp').textContent='local \u2022 '+fmtDate(today());
+  document.getElementById('dot').classList.toggle('on', (state.dirty||0)>0);
+  renderForm();
+}
+function setView(v){ state.view=v; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function claimsInUse(){ return [...new Set(state.rows.map(r=>(r.claim||'').trim()).filter(Boolean))].sort(); }
+function setClaim(v){ state.claimFilter=v; render(); }
+function claimMatch(r){ const c=state.claimFilter||'all'; if(c==='all') return true; if(c==='__none__') return !(r.claim||'').trim(); return (r.claim||'').trim()===c; }
+function claimBar(){
+  const cur=state.claimFilter||'all';
+  const opts=['<option value="all"'+(cur==='all'?' selected':'')+'>All claims</option>']
+    .concat(claimsInUse().map(c=>'<option value="'+escapeAttr(c)+'"'+(cur===c?' selected':'')+'>'+escapeHtml(c)+'</option>'))
+    .concat(['<option value="__none__"'+(cur==='__none__'?' selected':'')+'>(unassigned)</option>']);
+  return '<div class="claimbar">Showing claim: <select onchange="setClaim(this.value)">'+opts.join('')+'</select></div>';
+}
+function claimNumbersBar(){
+  const claims=claimsInUse(); if(!claims.length) return '';
+  return '<div class="claimnums"><span class="cn-lbl">Insurer claim no. \u2014 one per claim, applied to all its lines:</span>'+claims.map((c,i)=>{
+    const col=claimColor(c)||['#eef0fb','#4a4a86']; const val=(state.claimNumbers||{})[c]||'';
+    return '<span class="cn-item"><span class="lnk clm2" style="background:'+col[0]+';color:'+col[1]+';border-color:'+col[0]+'">'+escapeHtml(claimShort(c))+'</span><input class="cn-input" value="'+escapeAttr(val)+'" placeholder="claim no." oninput="updateClaimNumber('+i+',this.value)" onchange="render()"></span>';
+  }).join('')+'</div>';
+}
+function updateClaimNumber(i,val){ const c=claimsInUse()[i]; if(!c) return; state.claimNumbers=state.claimNumbers||{};
+  const v=(val||'').trim(); if(v) state.claimNumbers[c]=v; else delete state.claimNumbers[c]; markDirty(); save(); }
+function claimLabel(){ const c=state.claimFilter||'all'; return (c==='all'||c==='__none__')?'':' \u2014 '+c; }
+function claimShort(claim){ const c=(claim||'').trim(); if(!c) return ''; const m=c.match(/^(claim\s*\d+)/i); return m?m[1].replace(/\s+/g,' '):c.split(':')[0].trim(); }
+const CLAIM_COLORS=[['#e8f0fe','#1a56b8'],['#fdeecf','#8a5a12'],['#e9f7ef','#1e7a46'],['#fbeaf2','#a03d6b'],['#eee9fb','#5a4a86']];
+function claimColor(claim){ const i=claimsInUse().indexOf((claim||'').trim()); return i<0?null:CLAIM_COLORS[i%CLAIM_COLORS.length]; }
+function claimTag(r){ const c=(r.claim||'').trim(); if(!c) return ''; const col=claimColor(c)||['#eef0fb','#4a4a86'];
+  return `<span class="lnk clm2" style="background:${col[0]};color:${col[1]};border-color:${col[0]}" title="${escapeAttr(c)}">${escapeHtml(claimShort(c))}</span>`; }
+
+function nextRefMap(){
+  const max={};
+  state.rows.forEach(r=>{ const m=/^(\d{2})-([A-Za-z]+)-(\d+)/.exec((r.ref||'').trim()); if(!m) return;
+    const y=m[1], code=m[2].toUpperCase(), seq=parseInt(m[3],10);
+    max[y]=max[y]||{}; if(!(code in max[y]) || seq>max[y][code]) max[y][code]=seq; });
+  return max;
+}
+function renderNextRef(){
+  const max=nextRefMap();
+  const curY=String(new Date().getFullYear()%100).padStart(2,'0');
+  const years=Array.from(new Set([curY, ...Object.keys(max)])).sort().reverse();
+  const baseCodes=REFKEY.map(x=>x[0]);
+  const found=new Set(); Object.values(max).forEach(o=>Object.keys(o).forEach(c=>found.add(c)));
+  const codes=[...baseCodes, ...[...found].filter(c=>!baseCodes.includes(c))];
+  const pad=x=>String(x).padStart(3,'0');
+  const rows=years.map(y=>{
+    const cells=codes.map(c=>{ const nx=((max[y]&&max[y][c])||0)+1; return `<span class="nr-cell"><span class="nr-code">${c}</span>-${pad(nx)}</span>`; }).join('');
+    return `<div class="nr-row"><span class="nr-year">${y}</span><div class="nr-cells">${cells}</div></div>`;
+  }).join('');
+  document.getElementById('nextref').innerHTML=`<div class="rk-head"><span class="rk-badge alt">Next ref</span><span class="rk-fmt rk-dim">next number to assign per code &mdash; updates live as you add entries</span></div>${rows}`;
+}
+function renderFYOptions(){
+  const sel=document.getElementById('fyFilter'); const cur=sel.value||'all';
+  const fys=Array.from(new Set(state.rows.map(r=>fyOf(r.date)).filter(Boolean))).sort().reverse();
+  sel.innerHTML=`<option value="all">All financial years</option>`+fys.map(f=>`<option value="${f}">${f}</option>`).join('');
+  sel.value = fys.includes(cur)||cur==='all' ? cur : 'all';
+}
+
+function renderForm(){
+  const host=document.getElementById('form'); const ed=state.editing; const cur=ed?state.rows.find(r=>r.id===ed):null;
+  const defCat=CATEGORIES.find(c=>c.trim().toUpperCase().startsWith('M'))||CATEGORIES[0];
+  const catOpts=CATEGORIES.map(c=>`<option ${(cur?cur.cat===c:c===defCat)?'selected':''}>${c}</option>`).join('');
+  const stOpts=STATUSES.map(s=>`<option value="${s.k}" ${cur&&cur.status===s.k?'selected':(!cur&&s.k==='toclaim'?'selected':'')}>${s.label}</option>`).join('');
+  host.innerHTML=`<div class="entry"><h3>${cur?'Edit entry':'Add entry'}</h3><div class="fields">
+    <div class="field"><label>Date</label><input type="date" id="e-date" value="${cur?cur.date:today()}" onchange="onCatChange()"></div>
+    <div class="field wide"><label>Description</label><input type="text" id="e-desc" placeholder="e.g. PSA test / Dr Sharma OPD / Zoladex" value="${cur?escapeAttr(cur.desc||''):''}"></div>
+    <div class="field"><label>Category</label><select id="e-cat" onchange="onCatChange()">${catOpts}</select></div>
+    <div class="field"><label>Claim<span class="fhint"> which submission</span></label><input type="text" id="e-claim" list="claimlist" value="${cur?escapeAttr(cur.claim||''):''}"><datalist id="claimlist">${claimsInUse().map(c=>'<option value="'+escapeAttr(c)+'"></option>').join('')}</datalist></div>
+    <div class="field"><label>Claim bucket<span class="fhint"> insurer form section</span></label><select id="e-phase"><option value="">\u2014 none \u2014</option>${PHASES.map(p=>`<option value="${p[0]}" ${cur&&cur.phase===p[0]?'selected':''}>${p[1]}</option>`).join('')}</select></div>
+    <div class="field wide" id="supports-field"><label>Supports<span class="fhint"> the row this hangs off \u2014 a bill \u2192 its RX; a report \u2192 its bill</span></label><select id="e-supports" onchange="formHints()"></select></div>
+    <div class="field"><label>Billed (\u20B9)<span class="fhint"> net bill; blank = auto</span></label><input type="number" step="any" id="e-billed" oninput="formHints()" value="${cur?(cur.billed??''):''}"></div>
+    <div class="field"><label>Insurer paid (\u20B9)<span class="fhint"> direct/cashless</span></label><input type="number" step="any" id="e-inspaid" oninput="formHints()" value="${cur?(cur.inspaid??''):''}"></div>
+    <div class="field"><label>Paid (\u20B9)<span class="fhint"> your share</span></label><input type="number" step="any" id="e-paid" oninput="formHints()" value="${cur?(cur.paid??''):''}"></div>
+    <div class="field"><label>Status</label><select id="e-status">${stOpts}</select></div>
+    <div class="field"><label>Claimed (\u20B9)</label><input type="number" step="any" id="e-claimed" value="${cur?(cur.claimed??''):''}"></div>
+    <div class="field"><label>Recovered (\u20B9)</label><input type="number" step="any" id="e-recovered" value="${cur?(cur.recovered??''):''}"></div>
+    <div class="field"><label>Claim no.<span class="fhint"> insurer ref \u2014 set on the RX, flows to its bills</span></label><input type="text" id="e-claimno" value="${cur?escapeAttr(cur.claimNo||''):''}"></div>
+    <div class="field"><label>Bill no.<span class="fhint"> number printed on the provider's bill</span></label><input type="text" id="e-billno" value="${cur?escapeAttr(cur.billNo||''):''}"></div>
+    <div class="field"><label>Issued by<span class="fhint"> provider name (shown in Section F)</span></label><input type="text" id="e-issuedby" value="${cur?escapeAttr(cur.issuedBy||''):''}"></div>
+    <div class="field"><label>Ref no. (auto)<span class="fhint"> your filing key</span></label><input type="text" id="e-ref" value="${cur?escapeAttr(cur.ref||''):''}" oninput="state.refManual=true"></div>
+    <div class="field wide"><label>Notes</label><input type="text" id="e-notes" value="${cur?escapeAttr(cur.notes||''):''}"></div>
+  </div><div class="entry-actions"><button class="primary" onclick="addRow()">${cur?'Update entry':'Add entry'}</button>${cur?'<button class="ghost" onclick="cancelEdit()">Cancel</button>':''}</div><div class="formhints" id="formhints"></div></div>`;
+  if(cur){ state.refManual=true; } else { state.refManual=false; autoRef(); }
+  toggleRefMode(); refreshSupports(cur?(cur.linkTo||''):''); formHints();
+}
+function autoRef(){
+  if(state.refManual) return;
+  const catEl=document.getElementById('e-cat'), refEl=document.getElementById('e-ref'), dateEl=document.getElementById('e-date');
+  if(!catEl||!refEl) return;
+  const code=((catEl.value.split('\u2014')[0])||'').trim().toUpperCase();
+  if(!code) return;
+  const dv=(dateEl&&dateEl.value)||today();
+  const yy=(/^\d{4}-/.test(dv)?dv.slice(2,4):String(new Date().getFullYear()%100).padStart(2,'0'));
+  const max=nextRefMap();
+  const nx=((max[yy]&&max[yy][code])||0)+1;
+  refEl.value=`${yy}-${code}-${String(nx).padStart(3,'0')}`;
+}
+
+/* ---- derived helpers ---- */
+function codeOf(r){ const m=/^\d{2}-([A-Za-z]+)-/.exec((r.ref||'').trim()); if(m) return m[1].toUpperCase();
+  const c=((r.cat||'').split('\u2014')[0]||'').trim().toUpperCase(); return c; }
+function billOf(r){ const b=n(r.billed); return b>0?b:(n(r.paid)+n(r.inspaid)); }
+function linkTag(r){ if(isRxRow(r)) return ''; if(!r.linkTo) return '';
+  if(chainOk(r)) return `<span class="lnk">\u21B3 ${escapeHtml(refOf(r.linkTo)||'?')}</span>`;
+  return `<span class="lnk bad">\u21B3 broken link</span>`; }
+
+/* ---- claim form buckets (Pre / Hospitalization / Post / Health-checkup) ---- */
+function renderClaimForm(rows){
+  const host=document.getElementById('bucketview'); if(!host) return;
+  const head=`<div class="sheet-head"><div><div class="st">Claim Form${claimLabel()}${state.fy!=='all'?' \u2014 '+state.fy:''}</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'} \u00B7 open to claim by section</div></div><div class="meta">Generated ${fmtDate(today())}</div></div>`;
+  const defs=PHASES.map(p=>({key:p[0],label:p[1]})).concat([{key:'',label:'Unassigned'}]);
+  let out='', grandOpen=0, grandOpenN=0;
+  defs.forEach(d=>{
+    const items=sortedDesc(rows.filter(r=>billOf(r)>0 && (r.phase||'')===d.key && r.status!=='nonclaim' && claimMatch(r)));
+    if(d.key==='' && items.length===0) return;                       // hide empty Unassigned
+    const open=items.filter(r=>r.status==='toclaim');
+    const openTotal=open.reduce((a,r)=>a+billOf(r),0);
+    const subTotal=items.filter(r=>r.status==='submitted').reduce((a,r)=>a+billOf(r),0);
+    const setTotal=items.filter(r=>r.status==='settled').reduce((a,r)=>a+billOf(r),0);
+    const bucketTotal=items.reduce((a,r)=>a+billOf(r),0);
+    grandOpen+=openTotal; grandOpenN+=open.length;
+    const warn=d.key===''?' style="border-color:#e6b7b7"':'';
+    const rowsHtml = open.length ? '<table class="rx-children"><tbody>'+open.map(r=>mapRowLine(r,false)).join('')+'</tbody></table>'
+                                 : `<div class="rx-none">Nothing open to claim in this section.</div>`;
+    out+=`<div class="rx-block"${warn}><div class="rx-top"><div><span class="rx-desc">${escapeHtml(d.label)}</span>${d.key===''?' <span style="color:#9a3b3b;font-size:11px">\u2014 give these a bucket</span>':''}</div><div><span class="rx-flag rf-open">open to claim: ${open.length} \u00B7 ${rupee(openTotal)}</span></div></div>${rowsHtml}<div class="rx-sub">${items.length} item${items.length===1?'':'s'} in section \u00B7 open ${rupee(openTotal)}${subTotal?' \u00B7 submitted '+rupee(subTotal):''}${setTotal?' \u00B7 settled '+rupee(setTotal):''} \u00B7 section total ${rupee(bucketTotal)}</div></div>`;
+  });
+  if(!out) out=`<div class="empty-note">No claimable expenses${state.claimFilter&&state.claimFilter!=='all'?' in this claim':''} yet. Set a <b>Claim bucket</b> on a bill to see it grouped here.</div>`;
+  host.innerHTML=head+claimBar()+out+`<div class="sheet-foot">Open-to-claim across all sections: <b>${grandOpenN} item${grandOpenN===1?'':'s'} \u00B7 ${rupee(grandOpen)}</b>. Copy each section into the matching part of the insurer\u2019s claim form.</div>`;
+}
+
+/* ---- Dashboard: filing status per claim-stage ---- */
+const STAGE_DEFS=[['hosp','Hospitalization'],['pre','Pre-hospitalization'],['post','Post-hospitalization'],['checkup','Health check-up']];
+const FILING_STATUS=[['','Pending'],['filed','Filed'],['approved','Approved'],['settled','Settled'],['rejected','Rejected']];
+const FST_CLS={'':'fs-pending','filed':'fs-filed','approved':'fs-approved','settled':'fs-settled','rejected':'fs-rejected'};
+function setFiling(ci,phase,field,val){ const claim=claimsInUse()[ci]; if(claim==null) return; state.filings=state.filings||{}; const k=filingKey(claim,phase); const f=state.filings[k]||{status:'',ref:'',date:''}; f[field]=val; state.filings[k]=f; markDirty(); save(); }
+function setFilingStatus(ci,phase,val){ setFiling(ci,phase,'status',val); render(); }
+function setDashNote(val){ state.dashNote=val; markDirty(); save(); }
+function renderDashboard(rows){
+  const host=document.getElementById('dashview'); if(!host) return;
+  const claims=claimsInUse(); const sum=arr=>arr.reduce((a,r)=>a+billOf(r),0);
+  let blocks='', nFiled=0, nPending=0, amtFiled=0, amtPending=0;
+  claims.forEach((claim,ci)=>{
+    const col=claimColor(claim)||['#eef0fb','#4a4a86']; let stageRows='', claimTotal=0;
+    STAGE_DEFS.forEach(([ph,label])=>{
+      const inStage=rows.filter(r=>(r.claim||'').trim()===claim && (r.phase||'')===ph && billOf(r)>0 && r.status!=='nonclaim');
+      const claimable=inStage.filter(r=>r.status!=='cashless'); const cashless=inStage.filter(r=>r.status==='cashless');
+      if(!claimable.length && !cashless.length) return;
+      const amt=sum(claimable); claimTotal+=amt+sum(cashless);
+      if(claimable.length){
+        const f=getFiling(claim,ph);
+        if(['filed','approved','settled'].includes(f.status)){ nFiled++; amtFiled+=amt; } else if(f.status!=='rejected'){ nPending++; amtPending+=amt; }
+        const stOpts=FILING_STATUS.map(([v,l])=>`<option value="${v}" ${f.status===v?'selected':''}>${l}</option>`).join('');
+        stageRows+=`<tr><td class="l">${label}</td><td>${claimable.length}</td><td class="dm-amt">${rupee(amt)}</td>`+
+          `<td class="l"><select class="dm-status ${FST_CLS[f.status||'']}" onchange="setFilingStatus(${ci},'${ph}',this.value)">${stOpts}</select></td>`+
+          `<td class="l"><input class="dm-ref" value="${escapeAttr(f.ref||'')}" placeholder="claim ref no." oninput="setFiling(${ci},'${ph}','ref',this.value)" onchange="render()"></td>`+
+          `<td class="l"><input type="date" class="dm-date" value="${escapeAttr(f.date||'')}" onchange="setFiling(${ci},'${ph}','date',this.value);render()"></td>`+
+          `<td class="l"><input class="dm-note" value="${escapeAttr(f.note||'')}" placeholder="note" oninput="setFiling(${ci},'${ph}','note',this.value)"></td></tr>`;
+      } else {
+        stageRows+=`<tr class="dm-cash"><td class="l">${label}</td><td>${cashless.length}</td><td class="dm-amt">${rupee(sum(cashless))}</td><td class="l" colspan="4"><span class="fs-cash">Cashless \u2014 settled by TPA (not a reimbursement filing)</span></td></tr>`;
+      }
+    });
+    if(!stageRows) return;
+    blocks+=`<div class="dm-block"><div class="dm-head"><span class="lnk clm2" style="background:${col[0]};color:${col[1]};border-color:${col[0]}">${escapeHtml(claimShort(claim))}</span> <span class="dm-name">${escapeHtml(claim)}</span> <span class="dm-total">total ${rupee(claimTotal)}</span></div>`+
+      `<table class="dashtable"><thead><tr><th class="l">Stage</th><th>Bills</th><th class="dm-amt">Amount</th><th class="l">Status</th><th class="l">Claim ref no.</th><th class="l">Filed on</th><th class="l">Notes</th></tr></thead><tbody>${stageRows}</tbody></table></div>`;
+  });
+  if(!blocks) blocks=`<div class="empty-note">No claims tagged yet. Tag bills with a Claim and a bucket to see filing progress here.</div>`;
+  const head=`<div class="sheet-head"><div><div class="st">Claims Dashboard</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'} \u00B7 filing progress by stage</div></div><div class="meta">Generated ${fmtDate(today())}</div></div>`;
+  const strip=`<div class="dm-summary"><span class="dm-pill fs-filed">${nFiled} filed \u00B7 ${rupee(amtFiled)}</span><span class="dm-pill fs-pending">${nPending} pending \u00B7 ${rupee(amtPending)}</span></div>`;
+  const planNote=`<div class="dm-plan"><div class="dm-plan-lbl">Plan / notes</div><textarea class="dm-plan-box" placeholder="Broader plan, reminders, what's next\u2026" oninput="setDashNote(this.value)">${escapeHtml(state.dashNote||'')}</textarea></div>`;
+  host.innerHTML=head+strip+planNote+blocks+`<div class="sheet-foot">Each stage is filed as its own submission with its own claim reference \u2014 set the status, reference and date as you file each. Pre/post windows: 60 days before / 90 days after each admission.</div>`;
+}
+
+/* ---- Filing Packet: full upload set (bills + prescriptions + reports) per claim-stage ---- */
+function renderPacket(rows){
+  const host=document.getElementById('packetview'); if(!host) return;
+  const sum=arr=>arr.reduce((a,r)=>a+billOf(r),0);
+  const cf=state.claimFilter||'all';
+  const allClaims=claimsInUse();
+  const hasUnassigned=rows.some(r=>!(r.claim||'').trim() && billOf(r)>0 && !isRefRow(r) && r.status!=='nonclaim');
+  const claimsToShow = cf==='all' ? allClaims.concat(hasUnassigned?['']:[]) : (cf==='__none__'?['']:[cf]);
+  const STAGES=[['hosp','Hospitalization'],['pre','Pre-hospitalization'],['post','Post-hospitalization'],['checkup','Health check-up'],['','No bucket']];
+  const stName={filed:'Filed',approved:'Approved',settled:'Settled',rejected:'Rejected'};
+  let out='';
+  claimsToShow.forEach(claim=>{
+    const col=claim?(claimColor(claim)||['#eef0fb','#4a4a86']):['#ececf0','#666'];
+    let stages='';
+    STAGES.forEach(([ph,label])=>{
+      const bills=sortedDesc(rows.filter(r=>(r.claim||'').trim()===claim && (r.phase||'')===ph && billOf(r)>0 && !isRefRow(r) && r.status!=='nonclaim'));
+      if(!bills.length) return;
+      const billIds=new Set(bills.map(b=>b.id));
+      const rxSet={}; bills.forEach(b=>{ const rx=rowById(resolveRX(b.id)); if(rx) rxSet[rx.ref]=rx; });
+      const rxs=Object.values(rxSet).sort((a,b)=>(a.ref||'')<(b.ref||'')?-1:1);
+      const reps=sortedDesc(rows.filter(r=>codeOf(r)==='RP' && billIds.has(r.linkTo)));
+      const f=getFiling(claim,ph);
+      const badge = f.status?`<span class="pk-badge fs-${f.status}">${stName[f.status]||''}${f.ref?' \u00B7 '+escapeHtml(f.ref):''}</span>`:`<span class="pk-badge fs-pending">Not filed</span>`;
+      const total=sum(bills.filter(b=>b.status!=='cashless'));
+      const billsTbl='<table class="rx-children"><tbody>'+bills.map(b=>{ const st=statusMap[b.status]||{label:b.status,cls:'s-nonclaim'};
+        const cash=b.status==='cashless'?' <span class="sf-cash-tag">cashless</span>':'';
+        return `<tr><td class="code">${codeOf(b)}</td><td class="l">${escapeHtml(b.ref||'')}</td><td>${fmtDate(b.date)}</td><td class="l">${escapeHtml(issuerOf(b))}</td><td class="l">${escapeHtml(b.billNo||'')}</td><td>${rupee(billOf(b))}</td><td class="l"><span class="pill ${st.cls}">${st.label}</span>${cash}</td></tr>`;
+      }).join('')+'</tbody></table>';
+      const rxTbl=rxs.length?`<div class="pk-sub">Prescriptions to attach (${rxs.length})</div><table class="rx-children"><tbody>`+rxs.map(r=>`<tr><td class="code">RX</td><td class="l">${escapeHtml(r.ref||'')}</td><td>${fmtDate(r.date)}</td><td class="l" colspan="4">${escapeHtml(r.desc||'')}</td></tr>`).join('')+`</tbody></table>`:`<div class="pk-sub pk-none">No prescriptions linked</div>`;
+      const rpTbl=reps.length?`<div class="pk-sub">Reports to attach (${reps.length})</div><table class="rx-children"><tbody>`+reps.map(r=>{const p=rowById(r.linkTo);return `<tr><td class="code">RP</td><td class="l">${escapeHtml(r.ref||'')}</td><td>${fmtDate(r.date)}</td><td class="l" colspan="2">${escapeHtml(r.desc||'')}</td><td class="l">for ${escapeHtml(p?p.ref:'?')}</td></tr>`;}).join('')+`</tbody></table>`:'';
+      stages+=`<div class="pk-stage"><div class="pk-stage-head"><span class="pk-stage-name">${escapeHtml(label)}</span> <span class="pk-meta">${bills.length} bill${bills.length===1?'':'s'} \u00B7 ${rupee(total)}${rxs.length?' \u00B7 '+rxs.length+' Rx':''}${reps.length?' \u00B7 '+reps.length+' report'+(reps.length===1?'':'s'):''}</span><span class="pk-badge-wrap">${badge}</span></div><div class="pk-sub">Bills (${bills.length})</div>${billsTbl}${rxTbl}${rpTbl}</div>`;
+    });
+    if(!stages) return;
+    out+=`<div class="rx-block"><div class="rx-top"><div><span class="lnk clm2" style="background:${col[0]};color:${col[1]};border-color:${col[0]}">${escapeHtml(claim?claimShort(claim):'Unassigned')}</span> &nbsp;<span class="rx-desc">${escapeHtml(claim||'Unassigned')}</span></div></div><div class="pk-body">${stages}</div></div>`;
+  });
+  if(!out) out=`<div class="empty-note">No bills for this selection. Pick a claim above, or tag bills with a claim and bucket.</div>`;
+  const head=`<div class="sheet-head"><div><div class="st">Filing Packet${claimLabel()}</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'} \u00B7 what to upload, by stage</div></div><div class="meta">Generated ${fmtDate(today())}</div></div>`;
+  host.innerHTML=head+claimBar()+out+`<div class="sheet-foot">For each stage: the bills, the prescriptions that authorise them, and the reports they produced \u2014 the complete set to enclose/upload for that submission.</div>`;
+}
+
+/* ---- Section F: insurer's "Details of Bills Enclosed" form ---- */
+function fmtDMY(iso){ if(!iso) return ''; const p=(''+iso).split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:iso; }
+function provOf(r){ return ((r.desc||'').split(/[\u00B7\u2013\-]/)[0]||'').trim(); }
+function issuerOf(r){ return (r.issuedBy&&r.issuedBy.trim())?r.issuedBy.trim():provOf(r); }
+function renderSectionF(rows){
+  const host=document.getElementById('sfview'); if(!host) return;
+  const claimable=rows.filter(r=>billOf(r)>0 && !isRefRow(r) && r.status!=='nonclaim' && r.status!=='cashless' && claimMatch(r));
+  const cashless=rows.filter(r=>billOf(r)>0 && !isRefRow(r) && r.status==='cashless' && claimMatch(r));
+  const isPharm=r=>codeOf(r)==='M';
+  const issuerOf=r=>(r.issuedBy&&r.issuedBy.trim())?r.issuedBy.trim():provOf(r);
+  const sum=arr=>arr.reduce((a,r)=>a+billOf(r),0);
+  const npPhase=(arr,k)=>sortedDesc(arr.filter(r=>(r.phase||'')===k && !isPharm(r)));
+  const sections=[
+    {label:'Hospital Main Bill', set:npPhase(claimable,'hosp'), cash:npPhase(cashless,'hosp'), always:true},
+    {label:'Pre-hospitalization Bills', set:npPhase(claimable,'pre'), cash:npPhase(cashless,'pre'), always:true},
+    {label:'Post-hospitalization Bills', set:npPhase(claimable,'post'), cash:npPhase(cashless,'post'), always:true},
+    {label:'Pharmacy bills', set:sortedDesc(claimable.filter(isPharm)), cash:sortedDesc(cashless.filter(isPharm)), always:true},
+    {label:'Health check-up', set:npPhase(claimable,'checkup'), cash:npPhase(cashless,'checkup'), always:false},
+    {label:'Unassigned \u2014 give these a bucket', set:sortedDesc(claimable.filter(r=>!(r.phase||'') && !isPharm(r))), cash:[], always:false, warn:true},
+  ];
+  let sno=0, grand=0, grandCash=0; const R=[];
+  const billRow=r=>{ sno++; return `<tr><td class="sf-sno">${sno}</td><td>${escapeHtml(r.billNo||'')}</td><td class="sf-date${r.date?'':' sf-empty-date'}">${r.date?fmtDMY(r.date):'(DD/MM/YYYY)'}</td><td>${escapeHtml(issuerOf(r))}</td><td class="sf-tw">${escapeHtml(r.desc||'')}</td><td class="sf-amt">${rupee(billOf(r))}</td></tr>`; };
+  const cashRow=r=>{ sno++; return `<tr class="sf-cash"><td class="sf-sno">${sno}</td><td>${escapeHtml(r.billNo||'')}</td><td class="sf-date${r.date?'':' sf-empty-date'}">${r.date?fmtDMY(r.date):'(DD/MM/YYYY)'}</td><td>${escapeHtml(issuerOf(r))}</td><td class="sf-tw">${escapeHtml(r.desc||'')} <span class="sf-cash-tag">cashless \u2014 settled by TPA</span></td><td class="sf-amt">${rupee(billOf(r))}<div class="sf-cash-sub">not enclosed</div></td></tr>`; };
+  sections.forEach(s=>{
+    const cash=s.cash||[];
+    if(!s.set.length && !cash.length && !s.always) return;
+    R.push(`<tr class="sf-sec${s.warn?' sf-warn':''}"><td colspan="6">${escapeHtml(s.label)}</td></tr>`);
+    if(s.set.length || cash.length){
+      s.set.forEach(r=>{ R.push(billRow(r)); grand+=billOf(r); });
+      cash.forEach(r=>{ R.push(cashRow(r)); grandCash+=billOf(r); });
+    } else R.push(`<tr><td></td><td colspan="4" class="sf-none">\u2014 no bills \u2014</td><td class="sf-amt"></td></tr>`);
+    const cashNote = cash.length?` + ${cash.length} cashless (settled, not enclosed)`:'';
+    R.push(`<tr class="sf-sub"><td></td><td colspan="4">${escapeHtml(s.label)}: ${s.set.length} Nos${cashNote}</td><td class="sf-amt">${rupee(sum(s.set))}</td></tr>`);
+  });
+  R.push(`<tr class="sf-total"><td></td><td colspan="4">Total bills enclosed: ${sno-cashless.length} Nos${grandCash?' (excludes '+rupee(grandCash)+' settled cashless)':''}</td><td class="sf-amt">${rupee(grand)}</td></tr>`);
+  const head=`<div class="sheet-head"><div><div class="st">Section F \u2014 Details of Bills Enclosed${claimLabel()}</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'}</div></div><div class="meta">Generated ${fmtDate(today())}</div></div>`;
+  host.innerHTML=head+claimBar()+
+    `<div class="sf-title">Section F - Details of Bills Enclosed</div>`+
+    `<table class="sectionf"><thead><tr><th style="width:52px">S No.</th><th>Bill No.</th><th>Date</th><th>Issued by</th><th>Towards</th><th>Amount (INR)</th></tr></thead><tbody>${R.join('')}</tbody></table>`+
+    `<div class="sf-note"><b>Bill No.</b> is the number printed on each provider's bill (your filing Ref no. is not shown here \u2014 the insurer doesn't need it). Each section shows a <b>N Nos \u00B7 \u20B9total</b> subtotal to copy onto the insurer's form. A <b>cashless</b> hospital bill is shown for reference but its amount is <b>not</b> in the enclosed total (the TPA already settled it); pharmacy is grouped by code so no bill is counted twice.</div>`+
+    `<div class="sheet-foot">This itemised sheet is the "separate sheet" to enclose with Section F. Fill any blank <b>Bill No.</b> above by editing the row and entering the number from the physical bill.</div>`;
+}
+
+/* ---- claim map (computed from filtered rows) ---- */
+function mapRowLine(r, indent){
+  const st=statusMap[r.status]||{label:r.status,cls:'s-nonclaim'};
+  const lead = indent?'<span style="color:var(--paper-muted)">\u21B3 </span>':'';
+  const cl=effClaim(r); const cltag=cl?`<span class="clmtag">#${escapeHtml(cl)}</span>`:'';
+  return `<tr><td class="code">${codeOf(r)}</td><td class="l">${escapeHtml(r.ref||'')}</td><td>${fmtDate(r.date)}</td><td class="l"${indent?' style="padding-left:22px"':''}>${lead}${escapeHtml(r.desc||'')}${claimTag(r)}${cltag}</td><td>${billOf(r)?rupee(billOf(r)):'\u00B7'}</td><td class="l"><span class="pill ${st.cls}">${st.label}</span></td></tr>`;
+}
+function renderMap(rows){
+  const host=document.getElementById('mapview'); if(!host) return;
+  const rxs=sortedDesc(rows.filter(isRxRow));
+  const head=`<div class="sheet-head"><div><div class="st">Claim Map${state.fy!=='all'?' \u2014 '+state.fy:''}</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'}</div></div><div class="meta">Generated ${fmtDate(today())}<br>${rxs.length} prescription${rxs.length===1?'':'s'}</div></div>`;
+  let blocks='';
+  rxs.forEach(rx=>{
+    const members=rows.filter(r=>r.id!==rx.id && resolveRX(r.id)===rx.id);   // whole chain under this RX
+    const bills=members.filter(m=>!isRefRow(m));                              // things with a charge
+    let flag, tally='';
+    if(members.length===0){ flag=`<span class="rx-flag rf-empty">no linked bills yet</span>`; }
+    else{
+      const open=bills.filter(k=>k.status==='toclaim').length;
+      const cnt={}; members.forEach(k=>{ const s=(statusMap[k.status]||{}).label||k.status; cnt[s]=(cnt[s]||0)+1; });
+      tally='<span class="rx-tally">'+Object.entries(cnt).map(([s,c])=>c+' '+s.toLowerCase()).join(' \u00B7 ')+'</span>';
+      flag = open>0 ? `<span class="rx-flag rf-open">${open} still to claim</span>` : `<span class="rx-flag rf-done">nothing pending</span>`;
+    }
+    let kidrows='';
+    if(members.length){
+      const directs=sortedDesc(members.filter(m=>m.linkTo===rx.id));         // level 1: point straight at the RX
+      const shown=new Set();
+      let tbody='';
+      directs.forEach(d=>{ tbody+=mapRowLine(d,false); shown.add(d.id);
+        sortedDesc(members.filter(m=>m.linkTo===d.id)).forEach(s=>{ tbody+=mapRowLine(s,true); shown.add(s.id); }); });   // level 2: its reports
+      sortedDesc(members.filter(m=>!shown.has(m.id))).forEach(x=>{ tbody+=mapRowLine(x,true); });   // deeper chains, if any
+      const subBill=members.reduce((a,k)=>a+billOf(k),0), subPaid=members.reduce((a,k)=>a+n(k.paid),0), subClaim=members.reduce((a,k)=>a+n(k.claimed),0), subRec=members.reduce((a,k)=>a+n(k.recovered),0);
+      kidrows='<table class="rx-children"><tbody>'+tbody+'</tbody></table>'+
+        `<div class="rx-sub">${bills.length} bill${bills.length===1?'':'s'}${members.length>bills.length?' + '+(members.length-bills.length)+' report'+(members.length-bills.length===1?'':'s'):''} \u00B7 billed ${rupee(subBill)} \u00B7 your share ${rupee(subPaid)}${subClaim?' \u00B7 claimed '+rupee(subClaim):''}${subRec?' \u00B7 recovered '+rupee(subRec):''}</div>`;
+    } else { kidrows=`<div class="rx-none">Nothing links here yet. Enter a bill this prescription covers and pick <b>${escapeHtml(rx.ref||'this RX')}</b> in its <b>Supports</b> field; a report then points at that bill.</div>`; }
+    blocks+=`<div class="rx-block"><div class="rx-top"><div><span class="rx-id">${escapeHtml(rx.ref||'')}</span> &nbsp;<span class="rx-desc">${escapeHtml(rx.desc||'')}</span> &nbsp;<span class="rx-date">${fmtDate(rx.date)}</span></div><div>${rx.claimNo?`<span class="rx-claim">Claim ref: ${escapeHtml(rx.claimNo)}</span>`:''}${tally} &nbsp; ${flag}</div></div>${kidrows}</div>`;
+  });
+  if(rxs.length===0) blocks=`<div class="empty-note">No prescriptions yet. Add an entry with category <b>RX \u2014 Prescription</b> to anchor your bills.</div>`;
+
+  // documents whose chain doesn't reach a prescription
+  const unlinked=sortedDesc(rows.filter(r=>!isRxRow(r) && r.status!=='nonclaim' && !chainOk(r)));
+  let uwarn='';
+  if(unlinked.length){
+    uwarn=`<div class="map-section-h">Unlinked documents</div><div class="unlinked-warn"><div class="uh">${unlinked.length} document${unlinked.length===1?'':'s'} whose chain doesn\u2019t reach a prescription \u2014 a linked bill + report + RX is exactly what insurers want. Point each at its parent in the <b>Supports</b> field.</div><table class="rx-children"><tbody>`+
+      unlinked.map(k=>mapRowLine(k,false)).join('')+'</tbody></table></div>';
+  }
+  host.innerHTML=head+blocks+uwarn+`<div class="sheet-foot">A claim = one prescription and everything that chains up to it (bills, and the reports hanging off those bills). Print this page for a per-episode submission checklist.</div>`;
+}
+
+/* ---- checks (integrity + reconciliation, over ALL rows) ---- */
+function computeChecks(){
+  const rows=state.rows, groups=[];
+  const add=(sev,title,items)=>{ if(items.length) groups.push({sev,title,items}); };
+  const mk=(sig,html)=>({sig,html});
+
+  // duplicate refs
+  const byRef={}; rows.forEach(r=>{ const k=(r.ref||'').trim(); if(!k) return; (byRef[k]=byRef[k]||[]).push(r); });
+  add('high','Duplicate ref numbers', Object.entries(byRef).filter(([,a])=>a.length>1).map(([ref,a])=>mk('dup:'+ref, `<span class="ci-ref">${escapeHtml(ref)}</span> used on ${a.length} rows \u2014 two files would share a name`)));
+
+  // missing ref
+  add('high','Missing ref number', rows.filter(r=>!((r.ref||'').trim())).map(r=>mk('missingref:'+r.id, `${fmtDate(r.date)} \u00B7 ${escapeHtml(r.desc||'(no description)')} \u2014 can\u2019t be filed`)));
+
+  // dangling / wrong-type links
+  add('high','Broken links', rows.filter(r=>r.linkTo && !chainOk(r)).map(r=>mk('broken:'+(r.ref||r.id), `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> ${escapeHtml(r.desc||'')} \u2014 its link doesn\u2019t lead back to a prescription (broken or looping chain)`)));
+
+  // sequence gaps (per year+code, 1..max)
+  const seqMap={}; rows.forEach(r=>{ const m=/^(\d{2})-([A-Za-z]+)-(\d+)/.exec((r.ref||'').trim()); if(!m) return;
+    const key=m[1]+'-'+m[2].toUpperCase(); (seqMap[key]=seqMap[key]||new Set()).add(parseInt(m[3],10)); });
+  const gaps=[]; Object.entries(seqMap).forEach(([key,set])=>{ const max=Math.max(...set);
+    for(let i=1;i<=max;i++){ if(!set.has(i)){ const g=key+'-'+String(i).padStart(3,'0'); gaps.push(mk('gap:'+g, `<span class="ci-ref">${g}</span> missing \u2014 a lost scan or a deleted row`)); } } });
+  add('med','Sequence gaps', gaps);
+
+  // amount reconciliation
+  const amt=[]; rows.forEach(r=>{ if(isRefRow(r)) return; const b=n(r.billed),ip=n(r.inspaid),p=n(r.paid),c=n(r.claimed),rec=n(r.recovered); const rf=r.ref||r.id;
+    if(b>0 && (ip>0||p>0) && Math.abs(b-(ip+p))>1) amt.push(mk('amt:'+rf+':bill', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> billed ${rupee(b)} \u2260 insurer ${rupee(ip)} + you ${rupee(p)} (gap ${rupee(Math.abs(b-(ip+p)))})`));
+    if(c-p>1) amt.push(mk('amt:'+rf+':claim', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> claimed ${rupee(c)} > paid ${rupee(p)}`));
+    if(rec-c>1) amt.push(mk('amt:'+rf+':rec', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> recovered ${rupee(rec)} > claimed ${rupee(c)}`));
+  });
+  add('med','Amount reconciliation', amt);
+
+  // status coherence
+  const stc=[]; rows.forEach(r=>{ const rf=r.ref||r.id;
+    if(isRefRow(r) && (n(r.billed)||n(r.paid)||n(r.inspaid)||n(r.claimed)||n(r.recovered))) stc.push(mk('status:'+rf+':refamt', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> is a no-charge row (${codeOf(r)}) but carries an amount`));
+    if(r.status==='settled' && n(r.recovered)===0) stc.push(mk('status:'+rf+':settled0', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> marked settled but recovered is \u20B90`));
+    if(r.status==='submitted' && n(r.claimed)===0) stc.push(mk('status:'+rf+':submitted0', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> marked submitted but claimed is \u20B90`));
+    if((r.status==='submitted'||r.status==='settled') && !effClaim(r)) stc.push(mk('status:'+rf+':noclaimno', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> is ${r.status} but no claim number is recorded (set it on its RX)`));
+    if(r.status==='cashless' && n(r.inspaid)===0) stc.push(mk('status:'+rf+':cashless0', `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> marked cashless but insurer-paid is \u20B90`));
+  });
+  add('rev','Status coherence', stc);
+
+  // unlinked claimable
+  add('rev','Documents with no parent linked', rows.filter(r=>!isRxRow(r) && r.status!=='nonclaim' && !r.linkTo).map(r=>mk('noparent:'+(r.ref||r.id), `<span class="ci-ref">${escapeHtml(r.ref||'?')}</span> ${escapeHtml(r.desc||'')} (${codeOf(r)}) \u2014 point it at its ${isRefRow(r)?'bill or prescription':'prescription'} before you claim`)));
+
+  return groups;
+}
+function renderChecks(){
+  const host=document.getElementById('checkview');
+  const groups=computeChecks();
+  const dset=new Set((state.dismissed||[]).map(d=>d.sig));
+  const dmap={}; (state.dismissed||[]).forEach(d=>{ dmap[d.sig]=d; });
+  let activeTotal=0; const dismissedItems=[];
+  const activeGroups=groups.map(g=>{
+    const act=[]; g.items.forEach(i=>{ if(dset.has(i.sig)) dismissedItems.push(i); else act.push(i); });
+    activeTotal+=act.length;
+    return {sev:g.sev, title:g.title, items:act};
+  }).filter(g=>g.items.length);
+  const sevLabel={high:'High',med:'Check',rev:'Review'};
+  const head=`<div class="sheet-head"><div><div class="st">Checks</div><div class="pt">integrity &amp; reconciliation across all ${state.rows.length} rows</div></div><div class="meta">Generated ${fmtDate(today())}<br>${activeTotal} active item${activeTotal===1?'':'s'}${dismissedItems.length?' \u00B7 '+dismissedItems.length+' dismissed':''}</div></div>`;
+  let body = activeTotal===0 ? `<div class="chk-clear">\u2713 All clear \u2014 no active issues.</div>`
+    : activeGroups.map(g=>`<div class="chk-group"><div class="chk-h">${escapeHtml(g.title)}<span class="chk-sev sev-${g.sev}">${sevLabel[g.sev]}</span><span style="font-family:var(--mono);font-size:11px;color:var(--paper-muted)">${g.items.length}</span></div>${g.items.map(i=>`<div class="chk-item">${i.html}<span class="chk-dismiss" onclick="dismissCheck('${i.sig}')">dismiss</span></div>`).join('')}</div>`).join('');
+
+  // dismissed section
+  let dismissedHtml='';
+  if(dismissedItems.length){
+    dismissedHtml=`<div class="chk-group"><div class="chk-h" style="color:var(--paper-muted)">Dismissed<span style="font-family:var(--mono);font-size:11px;color:var(--paper-muted)">${dismissedItems.length}</span></div>`+
+      dismissedItems.map(i=>{ const d=dmap[i.sig]||{}; return `<div class="chk-item chk-off">${i.html}${d.note?`<span class="chk-dnote">\u2014 ${escapeHtml(d.note)}</span>`:''}<span class="chk-restore" onclick="restoreCheck('${i.sig}')">restore</span></div>`; }).join('')+`</div>`;
+  }
+
+  // physical reconciliation counts
+  const counts={}; state.rows.forEach(r=>{ const c=codeOf(r); if(c) counts[c]=(counts[c]||0)+1; });
+  const order=REFKEY.map(x=>x[0]).concat(Object.keys(counts).filter(c=>!REFKEY.map(x=>x[0]).includes(c)));
+  const recon=`<div class="map-section-h">Physical count</div><div class="hint" style="color:var(--paper-muted);margin:2px 0 6px">Eyeball these against the papers behind each divider. A mismatch, read with any sequence gap above, tells you which document never made it in.</div><div class="recon">`+
+    order.filter(c=>counts[c]).map(c=>`<div class="rc"><b>${c}</b> ${counts[c]}</div>`).join('')+`</div>`;
+
+  host.innerHTML=head+body+dismissedHtml+recon+`<div class="fp">Data fingerprint <b>${fingerprint()}</b> \u2014 stamped on every backup; two backups with the same fingerprint hold identical data.</div>`;
+  return activeTotal;
+}
+function dismissCheck(sig){
+  const note=prompt('Dismiss this check \u2014 add a short note on why it\u2019s OK (optional):','');
+  if(note===null) return;
+  state.dismissed=state.dismissed||[];
+  if(!state.dismissed.some(d=>d.sig===sig)) state.dismissed.push({sig, note:(note||'').trim(), at:today()});
+  markDirty(); save(); render();
+}
+function restoreCheck(sig){ state.dismissed=(state.dismissed||[]).filter(d=>d.sig!==sig); markDirty(); save(); render(); }
+function renderReadme(){
+  const host=document.getElementById('readmeview'); if(!host) return;
+  const binderOf=c=>(c==='RX'||c==='RP')?'Medical docs':'Invoices';
+  const amtOf=c=>(c==='RX'||c==='RP')?'\u2014 none':'Yes';
+  const codeRows=REFKEY.map(([c,short,desc])=>`<tr><td class="c">${c}</td><td>${short} <span style="color:var(--paper-muted)">\u2014 ${desc}</span></td><td>${binderOf(c)}</td><td>${amtOf(c)}</td></tr>`).join('');
+  host.innerHTML=`<div class="sheet-head"><div><div class="st">Read me \u2014 how this works</div><div class="pt">codes \u00B7 workflow \u00B7 why</div></div><div class="meta">${state.patient?('Patient: '+escapeHtml(state.patient)):''}</div></div>
+  <div class="rm">
+  <h2>The idea in one line</h2>
+  <p>Every document \u2014 bill, prescription or report \u2014 gets one <b>ref number</b> like <code>26-DX-007</code>. That same ref is the file name, the row in this tracker, and the paper\u2019s slot in the binder. Find any one, you\u2019ve found the other two. Nothing is tracked twice.</p>
+
+  <h2>The codes</h2>
+  <table class="rm-codes"><thead><tr><th>Code</th><th>What it is</th><th>Binder</th><th>Amount?</th></tr></thead><tbody>${codeRows}</tbody></table>
+  <p>Format <code>YY-CODE-SEQ</code> \u2014 year \u00B7 code \u00B7 a running number per code; the tracker assigns it automatically. <b>RX</b> (prescription) and <b>RP</b> (report) carry no charge and live in the <i>Medical-docs</i> binder; every other code is a bill and lives in the <i>Invoices</i> binder.</p>
+  <p><b>Claim bucket</b> is a separate tag on each bill \u2014 Pre-Hospitalization, Hospitalization, Post-Hospitalization or Health-Checkup \u2014 the four sections the insurer\u2019s claim form splits expenses into. It\u2019s independent of the code (a medicine can be pre- or post-hospitalization). The <b>Claim form</b> tab totals what\u2019s still open to claim in each section.</p>
+
+  <h2>Workflow</h2>
+  <ol>
+  <li><b>Log the prescription first</b> as an <code>RX</code> row (no amount). It anchors that visit.</li>
+  <li><b>Log each bill</b> (<code>M / DX / DR / C / H / O</code>) and in <b>Supports</b> point it at its prescription \u2014 done on the day. Later, when a <b>report</b> (<code>RP</code>) comes back, log it and point it at <b>its bill</b>; the tracker follows the chain up to the prescription on its own, so you never re-touch the bill.</li>
+  <li><b>Name the scan</b> with its ref \u2014 <code>26-DX-007_srl.pdf</code> \u2014 and file the paper behind that code\u2019s divider, in number order. Hospital / doctor go in the description or as a filename tag, never a folder.</li>
+  <li><b>As a claim moves</b>, update status: To&nbsp;claim \u2192 Submitted \u2192 Settled, and record the insurer\u2019s <b>Claim no.</b> on the prescription \u2014 it flows onto every bill under it (a bill can override with its own for a split claim).</li>
+  <li><b>Before filing</b>, open <b>Claim map</b> and <b>Checks</b> (gaps, duplicates, unlinked docs); the <b>Buckets</b> tab totals what\u2019s open to claim per section, and <b>Section F</b> prints the insurer\u2019s bills-enclosed form. Back up after every session.</li>
+  </ol>
+
+  <h2>Two worked examples</h2>
+  <div class="ex"><b>1 \u00B7 PSA follow-up</b> \u2014 Dr Mehta, SRL. One prescription, one test:<br>
+  \u2022 <b>26-RX-001</b> Dr Mehta advises PSA &nbsp;<span style="color:var(--paper-muted)">(RX, no amount)</span><br>
+  \u2022 <b>26-DX-004</b> PSA charge \u20B9900 &nbsp;\u2192 Supports <b>26-RX-001</b><br>
+  \u2022 <b>26-RP-002</b> PSA result sheet &nbsp;<span style="color:var(--paper-muted)">(RP, no amount)</span> \u2192 Supports <b>26-DX-004</b> (its bill) \u2014 chains up to 26-RX-001 by itself<br>
+  The Claim map nests it as <code>RX-001 \u203A DX-004 \u203A RP-002</code> \u2014 bill and its report paired, under the right prescription \u2014 so nothing an insurer asks for is missing.</div>
+  <div class="ex"><b>2 \u00B7 Biopsy day</b> \u2014 one prescription, several bills across places:<br>
+  \u2022 <b>26-RX-006</b> Dr Rao advises biopsy + meds &nbsp;<span style="color:var(--paper-muted)">(RX)</span><br>
+  \u2022 <b>26-H-003</b> biopsy procedure \u20B95,000 \u2192 <b>26-RX-006</b><br>
+  \u2022 <b>26-M-021</b> pharmacy, 2 meds \u20B9800 \u2192 <b>26-RX-006</b><br>
+  \u2022 <b>26-RP-005</b> histopathology report &nbsp;<span style="color:var(--paper-muted)">(RP)</span> \u2192 <b>26-H-003</b> (its bill)<br>
+  Four documents across both binders (H, M in Invoices; RX, RP in Medical-docs), one claim \u2014 the report chains through its bill up to the shared RX, never duplicated, never re-pointed.</div>
+
+  <h2>Why it\u2019s built this way</h2>
+  <ul class="why">
+  <li><b>One key, three layers.</b> The ref joins tracker \u2194 file \u2194 paper, so there\u2019s no separate index to keep in sync \u2014 and nothing to drift.</li>
+  <li><b>Append-only.</b> A new document is one new row + one new file. It never forces you to rename, re-sort or edit anything that already exists \u2014 which is what keeps upkeep near zero.</li>
+  <li><b>Folders capture the one dimension that never overlaps</b> \u2014 the codes (what a document is <i>about</i>). Everything that cuts across them \u2014 hospital, doctor, invoice-vs-report \u2014 is a field or a filename tag, never a folder level, so no document ever faces a \u201cwhich folder?\u201d question with two right answers.</li>
+  <li><b>Prescriptions and reports carry no money</b> (RX, RP). Keeping them as no-charge anchors and evidence \u2014 not expenses \u2014 keeps the money totals honest and lets every bill point back to the advice that justifies it, which is exactly the pairing insurers check.</li>
+  <li><b>The claim <i>is</i> the prescription.</b> One RX plus everything linked to it is one episode, so you assemble a claim by following links, not by hunting folders \u2014 and Checks guarantees nothing is orphaned before you submit.</li>
+  </ul>
+  </div>`;
+}
+function hashStr(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h.toString(36); }
+function fingerprint(){ const paid=state.rows.reduce((a,r)=>a+n(r.paid),0);
+  const basis=JSON.stringify(state.rows.map(r=>[r.ref,r.date,r.billed,r.inspaid,r.paid,r.claimed,r.recovered,r.status,r.linkTo]));
+  return `R${state.rows.length}\u00B7\u20B9${Math.round(paid)}\u00B7${hashStr(basis)}`; }
+
+/* ---- live form hints ---- */
+function formHints(){
+  const host=document.getElementById('formhints'); if(!host) return;
+  const g=id=>{ const el=document.getElementById(id); return el?el.value:''; };
+  const cat=(g('e-cat')||''); const code=((cat.split('\u2014')[0])||'').trim().toUpperCase();
+  const isRef=(code==='RX'||code==='RP');
+  const b=n(g('e-billed')),ip=n(g('e-inspaid')),p=n(g('e-paid'));
+  const sup=g('e-supports'); const lines=[];
+  if(isRef){ if(b||ip||p) lines.push('A no-charge row \u2014 leave the amounts blank.');
+             if(code==='RP' && !sup) lines.push('Point this report at its bill in Supports (or the prescription, if there\u2019s no separate charge).'); }
+  else{
+    if(b>0 && (ip>0||p>0) && Math.abs(b-(ip+p))>1) lines.push(`Billed \u2260 insurer-paid + your paid (gap \u20B9${Math.abs(b-(ip+p)).toLocaleString('en-IN')}).`);
+    if(CLAIM_CODES.includes(code) && !sup) lines.push('No prescription linked \u2014 insurers pair every bill to an RX. Pick one in Supports.');
+  }
+  host.innerHTML=lines.map(l=>`<div class="fhint-line">\u26A0 ${l}</div>`).join('');
+}
+function supportsOptionsFor(code, want){
+  const opt=(id,label)=>`<option value="${id}" ${want===id?'selected':''}>${escapeAttr(label)}</option>`;
+  let h=`<option value="">\u2014 none \u2014</option>`;
+  if(code==='RX') return h;                              // anchor links to nothing
+  if(code==='RP'){                                       // a report points at its bill (preferred) or an RX directly
+    const bills=billRows();
+    if(bills.length){ h+=`<optgroup label="Its bill (the test this reports on)">`+bills.map(b=>{ const rx=refOf(resolveRX(b.id)); return opt(b.id,(b.ref||'')+' \u00B7 '+(b.desc||'').slice(0,30)+(rx?(' \u2192 '+rx):'')); }).join('')+`</optgroup>`; }
+    h+=`<optgroup label="Prescription directly (no separate bill)">`+rxRows().map(r=>opt(r.id,(r.ref||'')+' \u00B7 '+(r.desc||'').slice(0,34))).join('')+`</optgroup>`;
+    return h;
+  }
+  h+=rxRows().map(r=>opt(r.id,(r.ref||'')+' \u00B7 '+(r.desc||'').slice(0,40))).join('');  // a bill \u2192 its prescription
+  return h;
+}
+function refreshSupports(preselect){
+  const catEl=document.getElementById('e-cat'), sup=document.getElementById('e-supports'); if(!catEl||!sup) return;
+  const code=((catEl.value.split('\u2014')[0])||'').trim().toUpperCase();
+  const want = preselect!==undefined ? preselect : sup.value;
+  sup.innerHTML=supportsOptionsFor(code, want);
+  sup.value=[...sup.options].some(o=>o.value===want)?(want||''):'';
+}
+function onCatChange(){ autoRef(); toggleRefMode(); refreshSupports(); formHints(); }
+function toggleRefMode(){
+  const catEl=document.getElementById('e-cat'); if(!catEl) return;
+  const code=((catEl.value.split('\u2014')[0])||'').trim().toUpperCase();
+  const isRef=(code==='RX'||code==='RP'), isAnchor=(code==='RX');
+  const money=['e-billed','e-inspaid','e-paid','e-claimed','e-recovered','e-status'];
+  money.forEach(id=>{ const el=document.getElementById(id); if(!el) return; el.disabled=isRef; if(isRef){ if(el.tagName==='SELECT'){ el.value='reference'; } else { el.value=''; } } else if(el.tagName==='SELECT' && el.value==='reference'){ el.value='toclaim'; } });
+  const sf=document.getElementById('supports-field'); if(sf) sf.style.display=isAnchor?'none':'';  // RX is the anchor; RP & bills link up to an RX
+}
+
+/* ---- actions ---- */
+function setFilter(k){ state.filter=k; render(); }
+function addRow(){
+  const rec={ date:document.getElementById('e-date').value||today(),
+    desc:document.getElementById('e-desc').value.trim(), cat:document.getElementById('e-cat').value,
+    billed:document.getElementById('e-billed').value.trim(), inspaid:document.getElementById('e-inspaid').value.trim(),
+    paid:document.getElementById('e-paid').value.trim(), status:document.getElementById('e-status').value,
+    claimed:document.getElementById('e-claimed').value.trim(), recovered:document.getElementById('e-recovered').value.trim(),
+    ref:document.getElementById('e-ref').value.trim(), notes:document.getElementById('e-notes').value.trim(),
+    claimNo:document.getElementById('e-claimno').value.trim(),
+    billNo:document.getElementById('e-billno').value.trim(),
+    issuedBy:document.getElementById('e-issuedby').value.trim(),
+    phase:(document.getElementById('e-phase')||{}).value||'',
+    claim:(document.getElementById('e-claim')||{}).value.trim(),
+    linkTo:(document.getElementById('e-supports')||{}).value||'' };
+  const code=((rec.cat||'').split('\u2014')[0]||'').trim().toUpperCase();
+  const isRef=(code==='RX'||code==='RP'), isAnchor=(code==='RX');
+  if(isRef){ rec.billed=''; rec.inspaid=''; rec.paid=''; rec.claimed=''; rec.recovered=''; rec.status='reference'; }
+  if(isAnchor){ rec.linkTo=''; }                       // RX links to nothing; RP keeps its link to an RX
+  if(!rec.desc){ toast('Add a description'); return; }
+  if(!isRef && !rec.paid && !rec.billed && !rec.inspaid){ toast('Add an amount, or use RX / RP for a prescription or report'); return; }
+  if(state.editing){ const r=state.rows.find(x=>x.id===state.editing); Object.assign(r,rec); state.editing=null; toast('Entry updated'); }
+  else{ rec.id='e'+Date.now()+Math.random().toString(36).slice(2,6); state.rows.push(rec); toast('Entry added'); }
+  markDirty(); save(); renderFYOptions(); render();
+}
+function editRow(id){ state.editing=id; renderForm(); document.getElementById('form').scrollIntoView({behavior:'smooth',block:'center'}); }
+function cancelEdit(){ state.editing=null; renderForm(); }
+function delRow(id){ if(!confirm('Delete this entry?')) return; state.rows=state.rows.filter(r=>r.id!==id); if(state.editing===id) state.editing=null; markDirty(); save(); renderFYOptions(); render(); toast('Entry deleted'); }
+
+function doPrint(){ window.print(); }
+function exportData(){
+  const fp=fingerprint();
+  const blob=new Blob([JSON.stringify({patient:state.patient,rows:state.rows,dismissed:state.dismissed,claimNumbers:state.claimNumbers,filings:state.filings,dashNote:state.dashNote,exported:new Date().toISOString(),fingerprint:fp},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='medical-expenses-backup-'+today()+'.json'; a.click(); URL.revokeObjectURL(a.href);
+  state.dirty=0; save(); render(); toast('Backup downloaded \u2014 fingerprint '+fp);
+}
+function importData(ev){ const file=ev.target.files[0]; if(!file) return; const reader=new FileReader();
+  reader.onload=e=>{ try{ const s=JSON.parse(e.target.result);
+    if(!confirm('This will replace the current data with the backup. Continue?')) return;
+    state.patient=s.patient||''; state.rows=s.rows||[]; state.dismissed=s.dismissed||[]; state.claimNumbers=s.claimNumbers||{}; state.filings=s.filings||{}; state.dashNote=s.dashNote||''; state.dirty=0; save(); renderFYOptions(); render(); toast('Backup restored');
+  }catch(err){ toast('Could not read that file'); } };
+  reader.readAsText(file); ev.target.value='';
+}
+document.getElementById('patientName').addEventListener('input',e=>{ state.patient=e.target.value; markDirty(); save(); render(); });
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+document.getElementById('rk-codes').innerHTML = REFKEY.map(([c,short,desc])=>`<div class="rk-item"><b>${c}</b> ${short} <span class="rk-desc">&mdash; ${desc}</span></div>`).join('');
+load(); renderFYOptions(); render();
+if((state.dirty||0)>3) setTimeout(()=>toast('You have '+state.dirty+' changes not yet backed up \u2014 consider a Backup'),700);
+</script>
+</body>
+</html>

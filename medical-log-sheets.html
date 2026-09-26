@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Log Sheets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1013; --panel:#161a20; --panel-2:#1d222b; --line:#2a313c;
+    --ink:#e8eaed; --muted:#9aa4b2; --dim:#6b7482;
+    --accent:#5b7a99; --accent-soft:#2f4155;
+    --flag:#c86b6b;
+    --paper:#ffffff; --paper-ink:#14181d; --paper-line:#d0d5dd; --paper-muted:#5b6470;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px; margin:0 auto; padding:22px 18px 80px}
+
+  header.app-chrome{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px}
+  .brand{display:flex; flex-direction:column; gap:3px}
+  .brand h1{font-size:16px; letter-spacing:.02em; margin:0; font-weight:600}
+  .brand .sub{font-size:12px; color:var(--dim); font-family:var(--mono)}
+  .patient{display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:7px 10px}
+  .patient label{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em}
+  .patient input{background:transparent; border:none; color:var(--ink); font-family:var(--mono); font-size:14px; width:180px; outline:none}
+
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px}
+  button{font-family:var(--sans); font-size:13px; cursor:pointer; border-radius:7px; border:1px solid var(--line); background:var(--panel); color:var(--ink); padding:8px 13px; transition:.12s; display:inline-flex; align-items:center; gap:7px}
+  button:hover{background:var(--panel-2); border-color:var(--accent-soft)}
+  button.primary{background:var(--accent-soft); border-color:var(--accent); color:#eaf1f8}
+  button.primary:hover{background:var(--accent)}
+  button.ghost{background:transparent}
+
+  .tabs{display:flex; gap:4px; margin-bottom:16px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+  .tab{padding:9px 15px; font-size:13px; color:var(--muted); border:none; background:none; border-bottom:2px solid transparent; border-radius:0; cursor:pointer; font-weight:500}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink); border-bottom-color:var(--accent)}
+
+  .sheet{display:none; background:var(--paper); color:var(--paper-ink); border-radius:6px; padding:26px 28px; box-shadow:0 4px 24px rgba(0,0,0,.4); margin-bottom:22px}
+  .sheet.active{display:block}
+  .sheet-head{display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--paper-ink); padding-bottom:12px}
+  .sheet-head .st{font-size:19px; font-weight:700; margin:0}
+  .sheet-head .pt{font-size:12px; color:var(--paper-muted); margin-top:3px; font-family:var(--mono)}
+  .sheet-head .meta{text-align:right; font-size:11px; color:var(--paper-muted); font-family:var(--mono); line-height:1.7}
+
+  table{width:100%; border-collapse:collapse; margin-top:14px; font-family:var(--mono); font-size:12.5px}
+  thead th{text-align:right; padding:7px 8px; border-bottom:1.5px solid var(--paper-ink); font-weight:700; white-space:nowrap; vertical-align:bottom}
+  thead th.l{text-align:left}
+  thead th .u{display:block; font-size:9.5px; color:var(--paper-muted); font-weight:400}
+  tbody td{padding:6px 8px; border-bottom:1px solid var(--paper-line); text-align:right; white-space:nowrap; vertical-align:top}
+  tbody td.l{text-align:left; white-space:normal}
+  tbody tr:hover{background:#f4f6f8}
+  td.date{font-weight:500}
+  td.flag{color:var(--flag); font-weight:700; background:#fbeeee}
+  td .arrow{font-size:10px; margin-left:4px; color:var(--paper-muted)}
+  td .arrow.up{color:#b45}
+  td .arrow.down{color:#284}
+  td.notes{font-family:var(--sans); font-size:11px; color:var(--paper-muted)}
+  .row-actions{opacity:0; display:inline-flex; gap:6px; font-family:var(--sans); margin-left:6px}
+  tbody tr:hover .row-actions{opacity:1}
+  .row-actions span{cursor:pointer; font-size:11px; color:var(--paper-muted); text-decoration:underline}
+  .row-actions span:hover{color:var(--paper-ink)}
+  .empty-note{text-align:center; color:var(--paper-muted); padding:22px; font-family:var(--sans); font-size:13px}
+  .sheet-foot{margin-top:16px; padding-top:10px; border-top:1px solid var(--paper-line); font-size:10px; color:var(--paper-muted); display:flex; justify-content:space-between; gap:12px}
+
+  /* master summary */
+  .master-sec{margin-top:20px}
+  .master-sec h4{font-size:12px; text-transform:uppercase; letter-spacing:.09em; color:var(--paper-muted); margin:0 0 8px; font-weight:700; border-bottom:1px solid var(--paper-line); padding-bottom:5px}
+  .snap-grid{display:grid; grid-template-columns:1fr 1fr; gap:11px 20px}
+  .snap-field{display:flex; flex-direction:column; gap:3px}
+  .snap-field.full{grid-column:1/-1}
+  .snap-field label{font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--paper-muted)}
+  .pin{border:1px solid var(--paper-line); border-radius:4px; padding:5px 7px; font-family:var(--mono); font-size:12px; color:var(--paper-ink); background:#fff; width:100%; outline:none}
+  .pin:focus{border-color:var(--accent)}
+  .pin:disabled{color:var(--paper-muted); background:#f6f7f8; font-style:italic}
+  textarea.pin{resize:vertical; min-height:38px; line-height:1.4}
+  .allergy-field label{color:var(--flag); font-weight:700}
+  .allergy-field .pin{border-color:var(--flag)}
+  .mini{width:100%}
+  .mini td{padding:4px 6px; border-bottom:1px solid var(--paper-line); vertical-align:middle}
+  .mini thead th{font-size:10px; padding:5px 6px}
+  .delcell{width:26px; text-align:center}
+  .delx{cursor:pointer; color:var(--paper-muted); font-family:var(--sans); font-size:14px; border:none; background:none; padding:0}
+  .delx:hover{color:var(--flag)}
+  .addbtn{margin-top:8px; font-size:12px; padding:5px 11px; background:#eef1f4; border:1px solid var(--paper-line); color:var(--paper-ink); border-radius:6px}
+  .addbtn:hover{background:#e2e7ec; border-color:var(--accent-soft)}
+
+  .entry{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:14px}
+  .entry h3{margin:0 0 12px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:600}
+  .fields{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px}
+  .field{display:flex; flex-direction:column; gap:4px}
+  .field label{font-size:11px; color:var(--dim); font-family:var(--mono)}
+  .field input{background:var(--panel-2); border:1px solid var(--line); border-radius:6px; color:var(--ink); padding:8px 9px; font-family:var(--mono); font-size:13px; outline:none}
+  .field input:focus{border-color:var(--accent)}
+  .field.wide{grid-column:1/-1}
+  .entry-actions{margin-top:12px; display:flex; gap:8px}
+
+  .ranges-panel{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:14px; display:none}
+  .ranges-panel.open{display:block}
+  .ranges-panel h3{margin:0 0 10px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+  .range-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px}
+  .range-row{display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .range-row .rl{flex:1}
+  .range-row input{width:64px; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; color:var(--ink); padding:5px 6px; font-family:var(--mono); font-size:12px; text-align:right}
+  .range-note{font-family:var(--sans); font-size:12px; color:var(--dim)}
+
+  .hint{font-size:12px; color:var(--dim); margin:10px 2px; line-height:1.6}
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--panel-2); border:1px solid var(--accent); color:var(--ink); padding:10px 16px; border-radius:8px; font-size:13px; opacity:0; transition:.2s; pointer-events:none; z-index:50}
+  .toast.show{opacity:1}
+  input[type=file]{display:none}
+
+  @media print{
+    @page{ size:A4; margin:13mm; }
+    body{background:#fff}
+    .app-chrome,.toolbar,.tabs,.entry,.ranges-panel,.hint,.row-actions,.toast,.edit-only{display:none !important}
+    .wrap{max-width:none; padding:0}
+    .sheet{display:none; box-shadow:none; border-radius:0; padding:0; margin:0; color:#000}
+    body.print-all .sheet{display:block; page-break-after:always}
+    body.print-all .sheet:last-of-type{page-break-after:auto}
+    body.print-current .sheet.active{display:block}
+    .blank-row{display:table-row !important}
+    tbody tr:hover{background:none}
+    .pin{border:none !important; padding:2px 0 !important; background:transparent !important}
+    .allergy-field .pin{border:none !important}
+    .pin:disabled{color:#000 !important; -webkit-text-fill-color:#000 !important; background:transparent !important; font-style:normal}
+    .delcell{display:none}
+  }
+  .blank-row{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app-chrome">
+    <div class="brand">
+      <h1>Medical Log Sheets</h1>
+      <span class="sub" id="genstamp"></span>
+    </div>
+    <div class="patient">
+      <label>Patient</label>
+      <input id="patientName" placeholder="Name" autocomplete="off">
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="primary" onclick="printAll()">&#9113; Print all sheets</button>
+    <button onclick="printCurrent()">&#9113; Print this sheet</button>
+    <button class="ghost" onclick="toggleRanges()">&#9881; Reference ranges</button>
+    <button class="ghost" onclick="exportData()">&#8595; Backup (JSON)</button>
+    <button class="ghost" onclick="document.getElementById('importFile').click()">&#8593; Restore</button>
+    <input type="file" id="importFile" accept="application/json" onchange="importData(event)">
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="ranges" class="ranges-panel"></div>
+  <div id="sheets"></div>
+  <div id="forms"></div>
+
+  <p class="hint">
+    Newest entry sits on top; every dated sheet auto-sorts by the entry&rsquo;s date, whatever order you type them in.
+    On the lab sheets, cells outside the reference range flag red &mdash; &ldquo;worth a look,&rdquo; not a diagnosis; confirm against the lab&rsquo;s own printed range.
+    Data saves in <strong>this browser on this device</strong> &mdash; hit <strong>Backup</strong> regularly to keep a copy you can Restore anywhere.
+  </p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORE_KEY = 'medlog:v1';
+
+const TESTS = {
+  psa: {
+    name: 'PSA & Testosterone', mode: 'panel',
+    fields: [
+      {key:'psa',   label:'PSA',          unit:'ng/mL', min:null, max:4,    trend:true},
+      {key:'testo', label:'Testosterone', unit:'ng/dL', min:null, max:null, trend:true},
+    ],
+  },
+  markers: {
+    name: 'Tumour Markers', mode: 'panel',
+    fields: [
+      {key:'nse',  label:'NSE',            unit:'ng/mL', min:0,   max:16.3},
+      {key:'cga',  label:'Chromogranin A', unit:'ng/mL', min:0,   max:100},
+      {key:'alp',  label:'ALP',            unit:'U/L',   min:40,  max:130},
+      {key:'ldh',  label:'LDH',            unit:'U/L',   min:140, max:280},
+    ],
+  },
+  psma: { name: 'PSMA SUV', mode: 'log',
+    logLabels:{ item:'Region', itemPh:'e.g. Prostate bed, L iliac node, T10', value:'SUVmax', valuePh:'e.g. 8.4', source:'Scan centre', foot:'Each region trends against its own previous SUVmax on an earlier scan (matched by region name).' } },
+  bloodwork: { name: 'Blood Work', mode: 'log',
+    logLabels:{ item:'Test', itemPh:'e.g. Hb, Creatinine', value:'Value', valuePh:'e.g. 12.4', source:'Lab / Source', foot:'Free-form log &mdash; repeated tests show a trend arrow vs the previous same-named entry.' } },
+};
+
+// editable lists in master summary
+const MLIST = {
+  hospitals:{ title:'Hospital registrations', cols:[{k:'name',l:'Hospital',w:'55%'},{k:'id',l:'UHID / Registration no.',w:'45%'}], tmpl:{name:'',id:''}, add:'+ Add hospital' },
+  policies: { title:'Insurance policies', cols:[{k:'insurer',l:'Insurer',w:'28%'},{k:'policyno',l:'Policy no.',w:'26%'},{k:'plan',l:'Plan',w:'26%'},{k:'end',l:'Valid till',w:'20%'}], tmpl:{insurer:'',policyno:'',plan:'',end:''}, add:'+ Add policy' },
+  meds:     { title:'Current medications', cols:[{k:'drug',l:'Medication',w:'19%'},{k:'dose',l:'Dose',w:'10%'},{k:'freq',l:'Frequency',w:'13%'},{k:'for',l:'For',w:'15%'},{k:'by',l:'Prescribed by',w:'14%'},{k:'start',l:'Started',w:'12%'},{k:'end',l:'Ended',w:'17%',type:'end'}], tmpl:{drug:'',dose:'',freq:'',for:'',by:'',start:'',end:'Ongoing'}, add:'+ Add medication' },
+  team:     { title:'Treating team', cols:[{k:'doctor',l:'Doctor',w:'28%'},{k:'spec',l:'Specialty',w:'26%'},{k:'hosp',l:'Hospital',w:'26%'},{k:'phone',l:'Phone',w:'20%'}], tmpl:{doctor:'',spec:'',hosp:'',phone:''}, add:'+ Add doctor' },
+  contacts: { title:'Emergency contacts', cols:[{k:'name',l:'Name',w:'38%'},{k:'rel',l:'Relation',w:'30%'},{k:'phone',l:'Phone',w:'32%'}], tmpl:{name:'',rel:'',phone:''}, add:'+ Add contact' },
+};
+
+let state = {
+  patient:'', active:'master',
+  data:{psa:[],markers:[],bloodwork:[]},
+  master:{ snapshot:{dob:'',blood:'',allergies:'',diagnosis:''}, hospitals:[], policies:[], meds:[], team:[], contacts:[], visits:[] },
+  ranges:{}, editing:null, editingVisit:null,
+};
+
+/* ---------- persistence ---------- */
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ const s = JSON.parse(raw);
+      state.patient = s.patient || '';
+      state.data = Object.assign({psa:[],markers:[],bloodwork:[]}, s.data||{});
+      state.ranges = s.ranges || {};
+      if(s.master){
+        const sn = s.master.snapshot || {};
+        state.master.snapshot = { dob:sn.dob||'', blood:sn.blood||'', allergies:sn.allergies||'', diagnosis:sn.diagnosis||'' };
+        state.master.hospitals = s.master.hospitals||[];
+        state.master.policies = s.master.policies||[];
+        state.master.meds = s.master.meds||[]; state.master.team = s.master.team||[];
+        state.master.contacts = s.master.contacts||[]; state.master.visits = s.master.visits||[];
+        // migrate legacy single fields into the new lists
+        if(sn.uhid && state.master.hospitals.length===0) state.master.hospitals=[{name:'',id:sn.uhid}];
+        if(sn.insurance && state.master.policies.length===0) state.master.policies=[{insurer:'',policyno:sn.insurance,plan:'',end:''}];
+      }
+    }
+  }catch(e){}
+  ensureDataKeys();
+}
+function ensureDataKeys(){ Object.keys(TESTS).forEach(k=>{ if(!Array.isArray(state.data[k])) state.data[k]=[]; }); }
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify({patient:state.patient,data:state.data,master:state.master,ranges:state.ranges})); }
+  catch(e){ toast('Could not save to this browser \u2014 use Backup to keep a copy'); }
+}
+function rangeFor(testKey, field){
+  const o = (state.ranges[testKey]||{})[field.key] || {};
+  return { min: o.min!==undefined?o.min:field.min, max: o.max!==undefined?o.max:field.max };
+}
+
+/* ---------- helpers ---------- */
+function fmtDate(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function num(v){ if(v===''||v===null||v===undefined) return null; const n=parseFloat(v); return isNaN(n)?null:n; }
+function outOfRange(val, r){ if(val===null) return false;
+  if(r.min!==null && r.min!==undefined && val<r.min) return true;
+  if(r.max!==null && r.max!==undefined && val>r.max) return true; return false; }
+function sortedAsc(arr){ return [...arr].sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:0); }
+function sortedDesc(arr){ return sortedAsc(arr).reverse(); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function tabList(){ return [{key:'master',name:'Master Summary'}].concat(Object.entries(TESTS).map(([k,t])=>({key:k,name:t.name}))); }
+
+/* ---------- render ---------- */
+function renderTabs(){
+  const el=document.getElementById('tabs'); el.innerHTML='';
+  tabList().forEach(t=>{
+    const b=document.createElement('button'); b.className='tab'+(state.active===t.key?' active':'');
+    b.textContent=t.name; b.onclick=()=>{ state.active=t.key; state.editing=null; state.editingVisit=null; renderAll(); };
+    el.appendChild(b);
+  });
+}
+
+function renderSheets(){
+  const host=document.getElementById('sheets'); host.innerHTML='';
+  tabList().forEach(t=>{
+    const sheet=document.createElement('div'); sheet.className='sheet'+(state.active===t.key?' active':'');
+    if(t.key==='master'){ sheet.innerHTML = masterSheet(); }
+    else { const cfg=TESTS[t.key]; const n=state.data[t.key].length;
+      const head=`<div class="sheet-head"><div><div class="st">${cfg.name}</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'}</div></div><div class="meta">Generated ${fmtDate(today())}<br>${n} record${n===1?'':'s'}</div></div>`;
+      sheet.innerHTML = head + (cfg.mode==='log' ? logTable(t.key) : panelTable(t.key,cfg));
+    }
+    host.appendChild(sheet);
+  });
+}
+
+/* ----- master summary sheet ----- */
+function masterSheet(){
+  const s=state.master.snapshot;
+  const head=`<div class="sheet-head"><div><div class="st">Master Summary</div><div class="pt">${state.patient?('Patient: '+escapeHtml(state.patient)):'Patient: \u2014'}</div></div><div class="meta">Generated ${fmtDate(today())}</div></div>`;
+
+  const snap=`<div class="master-sec"><h4>Patient snapshot</h4><div class="snap-grid">
+    <div class="snap-field"><label>Date of birth / Age</label><input class="pin" value="${escapeAttr(s.dob)}" onchange="setSnap('dob',this.value)"></div>
+    <div class="snap-field"><label>Blood group</label><input class="pin" value="${escapeAttr(s.blood)}" onchange="setSnap('blood',this.value)"></div>
+    <div class="snap-field full allergy-field"><label>Known allergies</label><input class="pin" placeholder="None known" value="${escapeAttr(s.allergies)}" onchange="setSnap('allergies',this.value)"></div>
+    <div class="snap-field full"><label>Working diagnosis / staging</label><textarea class="pin" rows="2" onchange="setSnap('diagnosis',this.value)">${escapeHtml(s.diagnosis)}</textarea></div>
+  </div></div>`;
+
+  const hospitals=editList('hospitals');
+  const policies=editList('policies');
+  const meds=editList('meds');
+  const team=editList('team');
+  const contacts=editList('contacts');
+
+  const rowsDesc=sortedDesc(state.master.visits);
+  let vrows='';
+  if(rowsDesc.length===0){ vrows=`<tr><td colspan="5" class="empty-note">No visits logged yet.</td></tr>`; }
+  else{ rowsDesc.forEach(v=>{ vrows+=`<tr>
+      <td class="l date">${fmtDate(v.date)}</td>
+      <td class="l">${escapeHtml(v.dept||'')}</td>
+      <td class="l">${escapeHtml(v.doctor||'')}</td>
+      <td class="l notes" style="font-size:12px">${escapeHtml(v.summary||'')}</td>
+      <td class="l notes" style="font-size:12px">${escapeHtml(v.followup||'')}<span class="row-actions"><span onclick="editVisit('${v.id}')">edit</span><span onclick="delVisit('${v.id}')">delete</span></span></td></tr>`; }); }
+  let vblanks=''; for(let i=0;i<6;i++){ vblanks+=`<tr class="blank-row"><td class="l"></td><td class="l"></td><td class="l"></td><td class="l"></td><td class="l"></td></tr>`; }
+  const visits=`<div class="master-sec"><h4>Visit log</h4>
+    <table><thead><tr><th class="l">Date</th><th class="l">Department</th><th class="l">Doctor</th><th class="l">What happened</th><th class="l">Follow-up</th></tr></thead>
+    <tbody>${vrows}${vblanks}</tbody></table></div>`;
+
+  return head+snap+hospitals+policies+meds+team+contacts+visits;
+}
+
+function editList(list){
+  const cfg=MLIST[list]; const rows=state.master[list];
+  let ths=''; cfg.cols.forEach(c=>ths+=`<th class="l" style="width:${c.w}">${c.l}</th>`); ths+=`<th class="delcell edit-only"></th>`;
+  let body='';
+  if(rows.length===0){ body=`<tr><td colspan="${cfg.cols.length+1}" class="empty-note" style="padding:12px">None added yet.</td></tr>`; }
+  else{ rows.forEach((r,i)=>{ let tds=''; cfg.cols.forEach(c=>{
+      if(c.type==='end'){ const ongoing=(r[c.k]==='Ongoing');
+        tds+=`<td class="l"><div style="display:flex;gap:6px;align-items:center"><input class="pin" style="flex:1;min-width:0" placeholder="DD/MM/YYYY" value="${ongoing?'Ongoing':escapeAttr(r[c.k]||'')}" ${ongoing?'disabled':''} onchange="setRow('${list}',${i},'${c.k}',this.value)"><label class="edit-only" style="font-size:10px;display:flex;gap:3px;align-items:center;white-space:nowrap;color:var(--paper-muted)"><input type="checkbox" ${ongoing?'checked':''} onchange="setOngoing('${list}',${i},this.checked)">ongoing</label></div></td>`;
+      } else { tds+=`<td class="l"><input class="pin" value="${escapeAttr(r[c.k]||'')}" onchange="setRow('${list}',${i},'${c.k}',this.value)"></td>`; } });
+    tds+=`<td class="delcell edit-only"><button class="delx" title="Remove" onclick="delRow('${list}',${i})">\u00D7</button></td>`;
+    body+=`<tr>${tds}</tr>`; }); }
+  return `<div class="master-sec"><h4>${cfg.title}</h4>
+    <table class="mini"><thead><tr>${ths}</tr></thead><tbody>${body}</tbody></table>
+    <button class="addbtn edit-only" onclick="addRow('${list}')">${cfg.add}</button></div>`;
+}
+
+/* ----- lab tables ----- */
+function panelTable(k,t){
+  const rowsDesc=sortedDesc(state.data[k]); const asc=sortedAsc(state.data[k]);
+  let ths=`<th class="l">Date</th>`; t.fields.forEach(f=>{ ths+=`<th>${f.label}<span class="u">${f.unit}</span></th>`; }); ths+=`<th class="l">Lab</th><th class="l">Notes</th>`;
+  let trs='';
+  if(rowsDesc.length===0){ trs=`<tr><td colspan="${t.fields.length+3}" class="empty-note">No readings yet. Add the first one below.</td></tr>`; }
+  else{ rowsDesc.forEach(rec=>{ let tds=`<td class="l date">${fmtDate(rec.date)}</td>`;
+    t.fields.forEach(f=>{ const v=rec.values[f.key]; const r=rangeFor(k,f); const flagged=outOfRange(v,r); let arrow='';
+      if(f.trend && v!==null && v!==undefined){ const idx=asc.findIndex(x=>x.id===rec.id);
+        if(idx>0){ const prev=asc[idx-1].values[f.key]; if(prev!==null && prev!==undefined){
+          if(v>prev) arrow=' <span class="arrow up">\u25B2</span>'; else if(v<prev) arrow=' <span class="arrow down">\u25BC</span>'; else arrow=' <span class="arrow">\u2014</span>'; } } }
+      tds+=`<td class="${flagged?'flag':''}">${v!==null&&v!==undefined&&v!==''?v:'\u00B7'}${arrow}</td>`; });
+    tds+=`<td class="l">${escapeHtml(rec.lab||'')}</td>`;
+    tds+=`<td class="l notes">${escapeHtml(rec.notes||'')}<span class="row-actions"><span onclick="editRec('${k}','${rec.id}')">edit</span><span onclick="delRec('${k}','${rec.id}')">delete</span></span></td>`;
+    trs+=`<tr>${tds}</tr>`; }); }
+  let blanks=''; for(let i=0;i<6;i++){ let bt=`<td class="l"></td>`; t.fields.forEach(()=>bt+=`<td></td>`); bt+=`<td class="l"></td><td class="l"></td>`; blanks+=`<tr class="blank-row">${bt}</tr>`; }
+  const foot=`<div class="sheet-foot"><span>${t.fields.map(f=>{const r=rangeFor(k,f);return f.label+': '+rangeLabel(r)+' '+f.unit;}).join('   \u00B7   ')}</span><span>Reviewed by ____________</span></div>`;
+  return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}${blanks}</tbody></table>`+foot;
+}
+function logTable(k){
+  const rowsDesc=sortedDesc(state.data[k]); const asc=sortedAsc(state.data[k]);
+  const L=TESTS[k].logLabels||{item:'Test',value:'Value',source:'Lab',foot:''};
+  const ths=`<th class="l">Date</th><th class="l">${L.item}</th><th>${L.value}</th><th class="l">${L.source}</th><th class="l">Notes</th>`;
+  let trs='';
+  if(rowsDesc.length===0){ trs=`<tr><td colspan="5" class="empty-note">No entries yet. Add the first one below.</td></tr>`; }
+  else{ rowsDesc.forEach(rec=>{ let arrow=''; const cur=parseFloat(rec.value);
+    if(!isNaN(cur)){ const norm=(rec.testType||'').trim().toLowerCase(); const idx=asc.findIndex(x=>x.id===rec.id);
+      for(let j=idx-1;j>=0;j--){ if((asc[j].testType||'').trim().toLowerCase()===norm){ const prev=parseFloat(asc[j].value);
+        if(!isNaN(prev)){ if(cur>prev) arrow=' <span class="arrow up">\u25B2</span>'; else if(cur<prev) arrow=' <span class="arrow down">\u25BC</span>'; else arrow=' <span class="arrow">\u2014</span>'; } break; } } }
+    trs+=`<tr><td class="l date">${fmtDate(rec.date)}</td><td class="l">${escapeHtml(rec.testType||'')}</td><td>${escapeHtml(rec.value||'')}${arrow}</td><td class="l">${escapeHtml(rec.lab||'')}</td><td class="l notes">${escapeHtml(rec.notes||'')}<span class="row-actions"><span onclick="editRec('${k}','${rec.id}')">edit</span><span onclick="delRec('${k}','${rec.id}')">delete</span></span></td></tr>`; }); }
+  let blanks=''; for(let i=0;i<8;i++){ blanks+=`<tr class="blank-row"><td class="l"></td><td class="l"></td><td></td><td class="l"></td><td class="l"></td></tr>`; }
+  const foot=`<div class="sheet-foot"><span>${L.foot||''}</span><span>Reviewed by ____________</span></div>`;
+  return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}${blanks}</tbody></table>`+foot;
+}
+function rangeLabel(r){ const lo=(r.min!==null&&r.min!==undefined), hi=(r.max!==null&&r.max!==undefined);
+  if(lo&&hi) return r.min+'\u2013'+r.max; if(hi) return '< '+r.max; if(lo) return '> '+r.min; return '\u2014'; }
+
+/* ---------- forms ---------- */
+function renderForm(){
+  const host=document.getElementById('forms'); host.innerHTML='';
+  const k=state.active;
+  if(k==='master'){
+    const ed=state.editingVisit; const cur=ed?state.master.visits.find(v=>v.id===ed):null;
+    const form=document.createElement('div'); form.className='entry';
+    form.innerHTML=`<h3>${cur?'Edit visit':'Log a visit'}</h3><div class="fields">
+      <div class="field"><label>Date</label><input type="date" id="v-date" value="${cur?cur.date:today()}"></div>
+      <div class="field"><label>Department</label><input type="text" id="v-dept" value="${cur?escapeAttr(cur.dept||''):''}"></div>
+      <div class="field"><label>Doctor</label><input type="text" id="v-doctor" value="${cur?escapeAttr(cur.doctor||''):''}"></div>
+      <div class="field wide"><label>What happened</label><input type="text" id="v-summary" value="${cur?escapeAttr(cur.summary||''):''}"></div>
+      <div class="field wide"><label>Follow-up</label><input type="text" id="v-followup" value="${cur?escapeAttr(cur.followup||''):''}"></div>
+    </div><div class="entry-actions"><button class="primary" onclick="addVisit()">${cur?'Update visit':'Add visit'}</button>${cur?'<button class="ghost" onclick="cancelVisit()">Cancel</button>':''}</div>`;
+    host.appendChild(form); return;
+  }
+  const t=TESTS[k]; const ed=state.editing; const cur=ed?state.data[k].find(r=>r.id===ed):null;
+  const form=document.createElement('div'); form.className='entry';
+  let fields=`<div class="field"><label>Date</label><input type="date" id="f-date" value="${cur?cur.date:today()}"></div>`;
+  if(t.mode==='log'){ const L=t.logLabels||{item:'Test',itemPh:'',value:'Value',valuePh:''};
+    fields+=`<div class="field"><label>${L.item}</label><input type="text" id="f-testType" placeholder="${L.itemPh||''}" value="${cur?escapeAttr(cur.testType||''):''}"></div>`;
+    fields+=`<div class="field"><label>${L.value}</label><input type="text" id="f-value" placeholder="${L.valuePh||''}" value="${cur?escapeAttr(cur.value||''):''}"></div>`;
+  } else { t.fields.forEach(f=>{ const val=cur?(cur.values[f.key]??''):''; fields+=`<div class="field"><label>${f.label} (${f.unit})</label><input type="number" step="any" id="f-${f.key}" value="${val}"></div>`; }); }
+  fields+=`<div class="field"><label>${(t.mode==='log'&&t.logLabels)?t.logLabels.source:'Lab / Source'}</label><input type="text" id="f-lab" value="${cur?escapeAttr(cur.lab||''):''}"></div>`;
+  fields+=`<div class="field wide"><label>Notes</label><input type="text" id="f-notes" value="${cur?escapeAttr(cur.notes||''):''}"></div>`;
+  form.innerHTML=`<h3>${cur?'Edit entry':'Add '+t.name+' entry'}</h3><div class="fields">${fields}</div><div class="entry-actions"><button class="primary" onclick="addRec()">${cur?'Update':'Add'}</button>${cur?'<button class="ghost" onclick="cancelEdit()">Cancel</button>':''}</div>`;
+  host.appendChild(form);
+}
+
+function renderRanges(){
+  const host=document.getElementById('ranges'); const k=state.active;
+  if(k==='master'){ host.innerHTML=`<div class="range-note">Reference ranges apply to the lab sheets.</div>`; return; }
+  const t=TESTS[k];
+  if(t.mode==='log'){ host.innerHTML=`<h3>${t.name}</h3><div class="range-note">This is a free-form log, so it has no fixed reference ranges.</div>`; return; }
+  let rows=''; t.fields.forEach(f=>{ const r=rangeFor(k,f);
+    rows+=`<div class="range-row"><span class="rl">${f.label} <span style="color:var(--dim)">(${f.unit})</span></span>
+      min <input type="number" step="any" value="${r.min??''}" onchange="setRange('${k}','${f.key}','min',this.value)">
+      max <input type="number" step="any" value="${r.max??''}" onchange="setRange('${k}','${f.key}','max',this.value)"></div>`; });
+  host.innerHTML=`<h3>${t.name} \u2014 reference ranges</h3><div class="range-grid">${rows}</div>`;
+}
+
+function renderAll(){ renderTabs(); renderSheets(); renderForm(); renderRanges(); document.getElementById('patientName').value=state.patient; document.getElementById('genstamp').textContent='local \u2022 '+fmtDate(today()); }
+
+/* ---------- master actions ---------- */
+function setSnap(field,val){ state.master.snapshot[field]=val; save(); }
+function setRow(list,i,field,val){ state.master[list][i][field]=val; save(); }
+function setOngoing(list,i,checked){ state.master[list][i].end = checked?'Ongoing':''; save(); renderSheets(); }
+function addRow(list){ state.master[list].push({...MLIST[list].tmpl}); save(); renderSheets(); }
+function delRow(list,i){ state.master[list].splice(i,1); save(); renderSheets(); }
+function addVisit(){
+  const date=document.getElementById('v-date').value||today();
+  const dept=document.getElementById('v-dept').value.trim();
+  const doctor=document.getElementById('v-doctor').value.trim();
+  const summary=document.getElementById('v-summary').value.trim();
+  const followup=document.getElementById('v-followup').value.trim();
+  if(!dept && !doctor && !summary){ toast('Add at least a department, doctor or note'); return; }
+  if(state.editingVisit){ const v=state.master.visits.find(x=>x.id===state.editingVisit); Object.assign(v,{date,dept,doctor,summary,followup}); state.editingVisit=null; toast('Visit updated'); }
+  else{ state.master.visits.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,6),date,dept,doctor,summary,followup}); toast('Visit added'); }
+  save(); renderAll();
+}
+function editVisit(id){ state.editingVisit=id; renderForm(); document.getElementById('forms').scrollIntoView({behavior:'smooth',block:'center'}); }
+function cancelVisit(){ state.editingVisit=null; renderForm(); }
+function delVisit(id){ if(!confirm('Delete this visit?')) return; state.master.visits=state.master.visits.filter(v=>v.id!==id); if(state.editingVisit===id) state.editingVisit=null; save(); renderAll(); toast('Visit deleted'); }
+
+/* ---------- lab actions ---------- */
+function addRec(){
+  const k=state.active, t=TESTS[k];
+  const date=document.getElementById('f-date').value || today();
+  const lab=document.getElementById('f-lab').value.trim(); const notes=document.getElementById('f-notes').value.trim();
+  let payload;
+  if(t.mode==='log'){ const testType=document.getElementById('f-testType').value.trim(); const value=document.getElementById('f-value').value.trim();
+    if(!testType || value===''){ toast('Enter '+((t.logLabels&&t.logLabels.item)?t.logLabels.item.toLowerCase():'a test')+' and value'); return; } payload={date,testType,value,lab,notes}; }
+  else{ const values={}; let any=false; t.fields.forEach(f=>{ const v=num(document.getElementById('f-'+f.key).value); values[f.key]=v; if(v!==null) any=true; });
+    if(!any){ toast('Enter at least one value'); return; } payload={date,values,lab,notes}; }
+  if(state.editing){ const rec=state.data[k].find(r=>r.id===state.editing); Object.assign(rec,payload); state.editing=null; toast('Entry updated'); }
+  else{ payload.id='r'+Date.now()+Math.random().toString(36).slice(2,6); state.data[k].push(payload); toast('Entry added'); }
+  save(); renderAll();
+}
+function editRec(k,id){ state.active=k; state.editing=id; renderAll(); document.getElementById('forms').scrollIntoView({behavior:'smooth',block:'center'}); }
+function cancelEdit(){ state.editing=null; renderAll(); }
+function delRec(k,id){ if(!confirm('Delete this entry?')) return; state.data[k]=state.data[k].filter(r=>r.id!==id); if(state.editing===id) state.editing=null; save(); renderAll(); toast('Entry deleted'); }
+function setRange(k,fkey,which,val){ state.ranges[k]=state.ranges[k]||{}; state.ranges[k][fkey]=state.ranges[k][fkey]||{}; state.ranges[k][fkey][which]= val===''?null:parseFloat(val); save(); renderSheets(); }
+function toggleRanges(){ document.getElementById('ranges').classList.toggle('open'); }
+
+/* ---------- print / io ---------- */
+function printAll(){ document.body.classList.add('print-all'); window.print(); }
+function printCurrent(){ document.body.classList.add('print-current'); window.print(); }
+window.addEventListener('afterprint',()=>{ document.body.classList.remove('print-all','print-current'); });
+function exportData(){
+  const blob=new Blob([JSON.stringify({patient:state.patient,data:state.data,master:state.master,ranges:state.ranges,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='medical-log-backup-'+today()+'.json'; a.click(); URL.revokeObjectURL(a.href); toast('Backup downloaded');
+}
+function importData(ev){
+  const file=ev.target.files[0]; if(!file) return; const reader=new FileReader();
+  reader.onload=e=>{ try{ const s=JSON.parse(e.target.result);
+    if(!confirm('This will replace the current data with the backup. Continue?')) return;
+    state.patient=s.patient||''; state.data=Object.assign({psa:[],markers:[],bloodwork:[]},s.data||{}); ensureDataKeys(); state.ranges=s.ranges||{};
+    if(s.master){ const sn=s.master.snapshot||{};
+      state.master={ snapshot:{dob:sn.dob||'',blood:sn.blood||'',allergies:sn.allergies||'',diagnosis:sn.diagnosis||''}, hospitals:s.master.hospitals||[], policies:s.master.policies||[], meds:s.master.meds||[], team:s.master.team||[], contacts:s.master.contacts||[], visits:s.master.visits||[] };
+      if(sn.uhid && state.master.hospitals.length===0) state.master.hospitals=[{name:'',id:sn.uhid}];
+      if(sn.insurance && state.master.policies.length===0) state.master.policies=[{insurer:'',policyno:sn.insurance,plan:'',end:''}];
+    }
+    save(); renderAll(); toast('Backup restored');
+  }catch(err){ toast('Could not read that file'); } };
+  reader.readAsText(file); ev.target.value='';
+}
+document.getElementById('patientName').addEventListener('input',e=>{ state.patient=e.target.value; save(); renderSheets(); });
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+load(); renderAll();
+</script>
+</body>
+</html>
